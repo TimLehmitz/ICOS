@@ -1,0 +1,1 @@
+time,tempce,luftfeucht,co2,laut,hell

@@ -1,0 +1,40 @@
+connect problem gelöst ein break hat gefehlt
+
+
+
+warnungen funktionieren jetzt wie folgt:
+es gibt warnungen für helligkeit lautstärke temperatur und co2
+
+
+
+    def warnungCo2(self):
+        if co2warnungen:
+            self.textLabel.setText(
+                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">CO2 "
+                "ist zu hoch</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
+                "Raum!</span></p></body></html>")
+            self.erscheinen()
+
+    die CO2sfunktion wird auf gerufen wenn die werte in den für rot definiereten bereichj kommen
+
+    falls die co2warnungen variable auf True ist wird das textlabel auf die CO2 warnung im warnfenster angezeigt
+    und das fenster erscheint
+
+    wenn das co2warnungen auf falls ist passiert garnichts
+
+    co2warnungen wird durch verschiedene Wege beeinflusst
+
+    über die Menüliste können die Warnungen auf False Setzen
+
+    def co2warnanaus(self):
+        global co2warnungen
+        warnungPopup.hide()
+        if co2warnungen:
+            co2warnungen = False
+
+        else:
+            co2warnungen = True
+
+    + wenn das warnfenster geschlossen wird wenn ein wert rot ist so wird die Warnung auch auf False gesetzt und erst
+    wenn es einmal auf etwas anderes springt und der Schalter der Menüleiste auch noch aktiv ist wird est wieder eine
+    warnung angezeigt

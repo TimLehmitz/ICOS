@@ -1,0 +1,3 @@
+https://learndataanalysis.org/create-an-app-to-view-folders-and-files-pyqt5-tutorial/
+https://www.codegrepper.com/code-examples/python/file+selector+in+pyqt5
+https://www.python-lernen.de/dateien-auslesen.htm

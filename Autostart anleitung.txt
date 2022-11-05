@@ -1,0 +1,8 @@
+WIN + R
+shell:startup
+
+verknüpfung zu hauptdatei in den Ordner legen
+
+
+
+wird noch automatisiert und in eine datei gepackt

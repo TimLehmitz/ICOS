@@ -1,0 +1,2 @@
+time,tempce,luftdruck,co2,laut,hell
+2022-11-01/19:41:53,22,1000,0,0,400

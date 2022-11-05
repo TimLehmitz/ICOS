@@ -1,0 +1,24 @@
+Temperaturoben Gelbegrenze: 
+26
+Temperaturoben Rotegrenze:
+29
+Temperaturunten Gelbegrenze:
+20
+Temperaturunten Rotegrenze:
+17
+Luftdruck Gelbgrenze:
+925
+Luftdruck Rotegrenze:
+1070
+CO2 Gelbgrenze:
+1000
+CO2 Rotegrenze:
+1750
+Lautstärke Gelbgrenze:
+70
+Lautstärke Rotegrenze:
+80
+Helligkeits Gelbgrenze:
+250
+Helligkeits Rotegrenze:
+150
