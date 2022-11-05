@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
 from PyQt5.QtGui import QMovie
 # Bildschirmgrößen Bestimmung
-
+# test for gitthub
 auflwidget = QtWidgets.QApplication(sys.argv)
 screen = auflwidget.primaryScreen()
 bild = screen.size()
