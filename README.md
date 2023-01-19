@@ -2,6 +2,6 @@
 ## Die universelle Unterrichtsampel
 Tim Lehmitz, Derik Leander Fritz-Pester, Wolfgang Rafelt
 
-Die Überwachung des Raumklimas in Unterrichtsräumen ist während der letzten Jahre in den Focus gerückt. Ein optimales Raumklima fördert
-die Leistungsfähigkeit der Schüler. Auf dem Markt existieren diverse Geräte zur Überwachung einzelner Komponenten der Raumluft. Mit dem
-ICOS-System werden vier der wichtigsten Komponenten mit einem Gerät gemessen und z.B. auf einer elektronischen Tafel visualisiert.
+[ICOS-Die universelle Unterrichtsampel-BELL.pdf](https://github.com/TimLehmitz/ICOS/files/10459447/ICOS-Die.universelle.Unterrichtsampel-BELL.pdf)
+
+![BELL-Verteidigung-Plakat-1](https://user-images.githubusercontent.com/117487931/213518699-81b8df6d-5b50-48b7-9615-7e0d57b40df2.png)
