@@ -1196,7 +1196,7 @@ class MainWindow(QMainWindow):
 
     # modus ändern funktionen
 
-    def changetosimpel(self, plhaltervar):
+    def changetosimpel(self):
         self.uimode.setCurrentIndex(1)
         self.resize(bildbreite // 10, int(bildhoehe) - 30)
         # print(bildbreite // 10, int(bildhoehe) - 30)
@@ -1229,7 +1229,7 @@ class MainWindow(QMainWindow):
 
     # zugroßample funktionen
 
-    def zugroampelhell(self, plhaltervar):
+    def zugroampelhell(self):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Hellampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1237,7 +1237,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Helligkeit')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampeltemp(self, plhaltervar):
+    def zugroampeltemp(self):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Tempampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1245,7 +1245,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Temperatur')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampellaut(self, plhaltervar):
+    def zugroampellaut(self):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Lautampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1253,7 +1253,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Lautstärke')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampelco2(self, plhaltervar):
+    def zugroampelco2(self):
 
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Co2ampel()
