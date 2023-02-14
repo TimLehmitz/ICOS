@@ -13,14 +13,17 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
 from PyQt5.QtCore import QTime, Qt
 from PyQt5.QtGui import *
-from PyQt5.QtGui import QFont
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
 from PyQt5.QtGui import QMovie
+
+
 # Bildschirmgrößen Bestimmung
 # test for gitthub
+
+
 auflwidget = QtWidgets.QApplication(sys.argv)
 screen = auflwidget.primaryScreen()
 bild = screen.size()
@@ -128,7 +131,7 @@ for i in COM:
 
 
 class Uhr(QLabel):
-    '''Allgemeine Uhren Klasse welche an die verschieden Uhren vererbt'''
+    """Allgemeine Uhren Klasse welche an die verschiedenen Uhren vererbt"""
 
     def __init__(self):
         super().__init__()
@@ -151,14 +154,14 @@ class Uhr(QLabel):
 
 
 class Infouhr(Uhr):
-    '''Infouhrklasse für die Uhren im Advanced-Modus '''
+    """Infouhrklasse für die Uhren im Advanced-Modus """
 
     def __init__(self):
         super().__init__()
 
 
 class Startinfouhr(Infouhr):
-    '''Zeigt die Startzeit der Messung im Advanced-Modus an '''
+    """Zeigt die Startzeit der Messung im Advanced-Modus an """
 
     def __init__(self):
         super().__init__()
@@ -210,7 +213,7 @@ class Startinfouhr(Infouhr):
 
 
 class Endinfouhr(Infouhr):
-    '''Zeigt die Endzeit der Messung im Advanced-Modus an'''
+    """Zeigt die Endzeit der Messung im Advanced-Modus an"""
 
     def __init__(self):
         super().__init__()
@@ -261,7 +264,7 @@ class Endinfouhr(Infouhr):
 
 
 class Liveuhr(Uhr):
-    '''Liveuhr im Developer-Modus zeigt die aktuelle Zeit '''
+    """Liveuhr im Developer-Modus zeigt die aktuelle Zeit """
 
     def __init__(self):
         super().__init__()
@@ -319,7 +322,7 @@ class Liveuhr(Uhr):
 
 
 class Ampel(QLabel):
-    '''Basis Ampelklasse vererbt an die spezifischen Ampeln '''
+    """Basis Ampelklasse vererbt an die spezifischen Ampeln """
 
     def __init__(self):
         super().__init__()
@@ -407,7 +410,7 @@ class Ampel(QLabel):
 
 
 class Hellampel(Ampel):
-    '''Ampel für die Helligkeit '''
+    """Ampel für die Helligkeit """
 
     def __init__(self):
         super().__init__()
@@ -485,7 +488,7 @@ class Hellampel(Ampel):
 
 
 class Tempampel(Ampel):
-    '''Ampel für die Temperatur '''
+    """Ampel für die Temperatur """
 
     def __init__(self):
         super().__init__()
@@ -559,7 +562,7 @@ class Tempampel(Ampel):
 
 
 class Lautampel(Ampel):
-    ''' Ampel für die Lautstärke '''
+    """ Ampel für die Lautstärke """
 
     def __init__(self):
         super().__init__()
@@ -633,7 +636,7 @@ class Lautampel(Ampel):
 
 
 class Co2ampel(Ampel):
-    '''Ampel für den Co2-Gehalt '''
+    """Ampel für den Co2-Gehalt """
 
     def __init__(self):
         super().__init__()
@@ -710,7 +713,7 @@ class Co2ampel(Ampel):
 
 
 class VerticalLabel(QLabel):
-    '''Verticales Label für den Simpel-Modus um die Ampeln zu beschriften '''
+    """Verticales Label für den Simpel-Modus um die Ampeln zu beschriften """
 
     def __init__(self, *args):
         QLabel.__init__(self, *args)
@@ -741,7 +744,7 @@ class VerticalLabel(QLabel):
 
 
 class Aboutwindow(QWidget):
-    ''' Fenster welches bei About angezeigt wird '''
+    """ Fenster welches bei About angezeigt wird """
 
     def __init__(self, *args, **kwargs):
         super(Aboutwindow, self).__init__(*args, **kwargs)
@@ -758,13 +761,13 @@ class Startwindow(QWidget):
         super(Startwindow, self).__init__(*args, **kwargs)
         uic.loadUi('ui/startpopwindow.ui', self)
         self.setWindowTitle('Startpop')
-        self.setWindowFlag(Qt.FramelessWindowHint,Qt.WindowStaysOnTopHint)
+        self.setWindowFlag(Qt.FramelessWindowHint, Qt.WindowStaysOnTopHint)
     def zeigen(self):
         self.show()
         self.movie = QMovie("ui/grafiken/startpop.gif")
         self.label.setMovie(self.movie)
         self.movie.start()
-        QTimer.singleShot(5000,self.close)
+        QTimer.singleShot(5000, self.close)
 
 
 class Moniindi(QWidget):
@@ -779,10 +782,6 @@ class Moniindi(QWidget):
         self.setWindowFlag(Qt.FramelessWindowHint, Qt.WindowStaysOnTopHint)
 
 
-
-
-
-
 # Warnungsklassen
 
 
@@ -793,7 +792,7 @@ class Warnungen(QWidget):
 
     def __init__(self, *args, **kwargs):
         super(Warnungen, self).__init__(*args, **kwargs)
-        QWidget.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
+        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
         uic.loadUi('ui/allgemeinWarnung.ui', self)
         self.move(bildbreite - self.width(), bildhoehe - self.height())
         self.resize(int(1920*0.9) // 5, int(1080*1) // 8)
@@ -877,7 +876,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        QMainWindow.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
+        QMainWindow.__init__(self, None, Qt.WindowStaysOnTopHint)
         # Load die UI Page
         uic.loadUi("ui/mainw.ui", self)
 
@@ -1180,9 +1179,8 @@ class MainWindow(QMainWindow):
 
         # Monitor anzeige
 
-
         self.monishowbutton.clicked.connect(self.showmoni)
-        #self.monifestbutton.clicked.connect(self.setmoni)
+        self.monifestbutton.clicked.connect(self.setmoni)
 
         # Scaling zum Bildschirm beim Start
 
@@ -1198,7 +1196,7 @@ class MainWindow(QMainWindow):
 
     # modus ändern funktionen
 
-    def changetosimpel(self, plhaltervar):
+    def changetosimpel(self):
         self.uimode.setCurrentIndex(1)
         self.resize(bildbreite // 10, int(bildhoehe) - 30)
         # print(bildbreite // 10, int(bildhoehe) - 30)
@@ -1231,7 +1229,7 @@ class MainWindow(QMainWindow):
 
     # zugroßample funktionen
 
-    def zugroampelhell(self, plhaltervar):
+    def zugroampelhell(self):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Hellampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1239,7 +1237,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Helligkeit')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampeltemp(self, plhaltervar):
+    def zugroampeltemp(self):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Tempampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1247,7 +1245,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Temperatur')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampellaut(self, plhaltervar):
+    def zugroampellaut(self):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Lautampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1255,7 +1253,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Lautstärke')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampelco2(self, plhaltervar):
+    def zugroampelco2(self):
 
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Co2ampel()
@@ -1379,7 +1377,7 @@ class MainWindow(QMainWindow):
                 self.adogelbgrenz.setData('')
                 self.adugelbgrenz.setData(adhellugelbgrenzlist)
                 self.adurotgrenz.setData(adhellurotgrenzlist)
-            # zum erweitern wäre noch
+            # zum Erweitern wäre noch
             #   https://stackoverflow.com/questions/49046931/how-can-i-use-dateaxisitem-of-pyqtgraph
 
     def changegrenzen(self):
@@ -1496,15 +1494,18 @@ class MainWindow(QMainWindow):
         grenzdaten.close()
 
     def showmoni(self):
-        print(screencounter)
+        print('Screenanzahl: ' + str(screencounter))
         for moni in range(screencounter):
-            print(moni)
             display_monitor = moni
             m0 = Moniindi()
             m0.infolabel.setText(str(moni))
             monitor = QDesktopWidget().screenGeometry(display_monitor)
             m0.move(monitor.left(), monitor.top())
             m0.show()
+            print('Monitor: '+str(moni))
+
+    def setmoni(self):
+        print('Setting Monitor...')
 
     # Unterricht und Warnungen
 
@@ -1617,7 +1618,7 @@ class MainWindow(QMainWindow):
                                          'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             tempampelfarbe = 'gelb'
             if self.actiontempwarnungen.isChecked():
-               tempwarnungen = True
+                tempwarnungen = True
 
         elif tempugelbgrenz < daten[1] <= tempogelbgrenz:
             self.temp_line.setPen(QColor(0, 255, 0))
@@ -1630,7 +1631,7 @@ class MainWindow(QMainWindow):
                                          'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             tempampelfarbe = 'gelb'
             if self.actiontempwarnungen.isChecked():
-               tempwarnungen = True
+                tempwarnungen = True
 
         elif daten[1] > temporotgrenz:
             self.temp_line.setPen(QColor(255, 0, 0))
@@ -1848,7 +1849,7 @@ class MainWindow(QMainWindow):
 
 
 def grafikdingens():
-    '''Setup für das Hauptfenster '''
+    """Setup für das Hauptfenster """
     app = QApplication(sys.argv)
     mw = MainWindow()
     mw.show()
@@ -1856,19 +1857,19 @@ def grafikdingens():
 
 
 def datenzeugs():
-    '''Datenthread welcher sich um Verbindung, Datenabruf und Datenverarbeitung kümmert '''
+    """Datenthread welcher sich um Verbindung, Datenabruf und Datenverarbeitung kümmert """
     global daten
 
     def dateianlegen():
         """ nimmt die aktualle Zeit und erstellt eine .txt Datei mit der Startzeit als Namen"""
 
         def punktentferner(x):
-            """entfernt die doppelpunkte in der zeit da Dateien keine Doppelpunkt im Namen haben kann"""
+            """entfernt die doppelpunkte in der Zeit da Dateien keine Doppelpunkte im Namen haben kann"""
             stelle = 0
             x = list(x)
             for i in x:
                 if i == ':':
-                    i = ' '  # möglichst keine Leerzeichen (was ist noich offen)
+                    i = ' '  # möglichst keine Leerzeichen (was ist noch offen)
                     x[stelle] = i
                 stelle = stelle + 1
             z = ''
@@ -1921,7 +1922,7 @@ def datenzeugs():
             global deviceconnected, ser
             """ empfängt die daten die vom esp32 gesendet werden,
                 kombiniert sie mit der zeit
-                und speicher die in der oben erstllen .txt datei"""
+                und speicher die in der oben erstellen .txt datei"""
 
             try:
 
@@ -1944,7 +1945,7 @@ def datenzeugs():
             # gibt keinen error aus
 
         def speichern(dateiname, daten):
-            """öffnet die datei schreibt die Daten in die .txt
+            """öffnet, die datei schreibt die Daten in die .txt
             und schließt diese wieder"""
             datenstr = str(daten[0]) + ',' + str(daten[1]) + ',' + \
                        str(daten[2]) + ',' + str(daten[3]) + ',' + \
@@ -1966,7 +1967,10 @@ def datenzeugs():
     dateiname = dateianlegen()
     datenverarbeitung()
 
+
 startpopup = Startwindow()
+
+
 startpopup.zeigen()
 
 
