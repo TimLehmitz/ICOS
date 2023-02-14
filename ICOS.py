@@ -13,14 +13,17 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import *
 from PyQt5.QtCore import QTime, Qt
 from PyQt5.QtGui import *
-from PyQt5.QtGui import QFont
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
 from PyQt5.QtGui import QMovie
+
+
 # Bildschirmgrößen Bestimmung
 # test for gitthub
+
+
 auflwidget = QtWidgets.QApplication(sys.argv)
 screen = auflwidget.primaryScreen()
 bild = screen.size()
@@ -758,13 +761,13 @@ class Startwindow(QWidget):
         super(Startwindow, self).__init__(*args, **kwargs)
         uic.loadUi('ui/startpopwindow.ui', self)
         self.setWindowTitle('Startpop')
-        self.setWindowFlag(Qt.FramelessWindowHint,Qt.WindowStaysOnTopHint)
+        self.setWindowFlag(Qt.FramelessWindowHint, Qt.WindowStaysOnTopHint)
     def zeigen(self):
         self.show()
         self.movie = QMovie("ui/grafiken/startpop.gif")
         self.label.setMovie(self.movie)
         self.movie.start()
-        QTimer.singleShot(5000,self.close)
+        QTimer.singleShot(5000, self.close)
 
 
 class Moniindi(QWidget):
@@ -779,10 +782,6 @@ class Moniindi(QWidget):
         self.setWindowFlag(Qt.FramelessWindowHint, Qt.WindowStaysOnTopHint)
 
 
-
-
-
-
 # Warnungsklassen
 
 
@@ -793,7 +792,7 @@ class Warnungen(QWidget):
 
     def __init__(self, *args, **kwargs):
         super(Warnungen, self).__init__(*args, **kwargs)
-        QWidget.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
+        QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
         uic.loadUi('ui/allgemeinWarnung.ui', self)
         self.move(bildbreite - self.width(), bildhoehe - self.height())
         self.resize(int(1920*0.9) // 5, int(1080*1) // 8)
@@ -877,7 +876,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        QMainWindow.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
+        QMainWindow.__init__(self, None, Qt.WindowStaysOnTopHint)
         # Load die UI Page
         uic.loadUi("ui/mainw.ui", self)
 
@@ -1180,9 +1179,8 @@ class MainWindow(QMainWindow):
 
         # Monitor anzeige
 
-
         self.monishowbutton.clicked.connect(self.showmoni)
-        #self.monifestbutton.clicked.connect(self.setmoni)
+        self.monifestbutton.clicked.connect(self.setmoni)
 
         # Scaling zum Bildschirm beim Start
 
@@ -1379,7 +1377,7 @@ class MainWindow(QMainWindow):
                 self.adogelbgrenz.setData('')
                 self.adugelbgrenz.setData(adhellugelbgrenzlist)
                 self.adurotgrenz.setData(adhellurotgrenzlist)
-            # zum erweitern wäre noch
+            # zum Erweitern wäre noch
             #   https://stackoverflow.com/questions/49046931/how-can-i-use-dateaxisitem-of-pyqtgraph
 
     def changegrenzen(self):
@@ -1496,15 +1494,18 @@ class MainWindow(QMainWindow):
         grenzdaten.close()
 
     def showmoni(self):
-        print(screencounter)
+        print('Screenanzahl: ' + str(screencounter))
         for moni in range(screencounter):
-            print(moni)
             display_monitor = moni
             m0 = Moniindi()
             m0.infolabel.setText(str(moni))
             monitor = QDesktopWidget().screenGeometry(display_monitor)
             m0.move(monitor.left(), monitor.top())
             m0.show()
+            print('Monitor: '+str(moni))
+
+    def setmoni(self):
+        print('Setting Monitor...')
 
     # Unterricht und Warnungen
 
