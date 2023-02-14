@@ -128,7 +128,7 @@ for i in COM:
 
 
 class Uhr(QLabel):
-    '''Allgemeine Uhren Klasse welche an die verschieden Uhren vererbt'''
+    """Allgemeine Uhren Klasse welche an die verschiedenen Uhren vererbt"""
 
     def __init__(self):
         super().__init__()
@@ -151,14 +151,14 @@ class Uhr(QLabel):
 
 
 class Infouhr(Uhr):
-    '''Infouhrklasse für die Uhren im Advanced-Modus '''
+    """Infouhrklasse für die Uhren im Advanced-Modus """
 
     def __init__(self):
         super().__init__()
 
 
 class Startinfouhr(Infouhr):
-    '''Zeigt die Startzeit der Messung im Advanced-Modus an '''
+    """Zeigt die Startzeit der Messung im Advanced-Modus an """
 
     def __init__(self):
         super().__init__()
@@ -210,7 +210,7 @@ class Startinfouhr(Infouhr):
 
 
 class Endinfouhr(Infouhr):
-    '''Zeigt die Endzeit der Messung im Advanced-Modus an'''
+    """Zeigt die Endzeit der Messung im Advanced-Modus an"""
 
     def __init__(self):
         super().__init__()
@@ -261,7 +261,7 @@ class Endinfouhr(Infouhr):
 
 
 class Liveuhr(Uhr):
-    '''Liveuhr im Developer-Modus zeigt die aktuelle Zeit '''
+    """Liveuhr im Developer-Modus zeigt die aktuelle Zeit """
 
     def __init__(self):
         super().__init__()
@@ -319,7 +319,7 @@ class Liveuhr(Uhr):
 
 
 class Ampel(QLabel):
-    '''Basis Ampelklasse vererbt an die spezifischen Ampeln '''
+    """Basis Ampelklasse vererbt an die spezifischen Ampeln """
 
     def __init__(self):
         super().__init__()
@@ -407,7 +407,7 @@ class Ampel(QLabel):
 
 
 class Hellampel(Ampel):
-    '''Ampel für die Helligkeit '''
+    """Ampel für die Helligkeit """
 
     def __init__(self):
         super().__init__()
@@ -485,7 +485,7 @@ class Hellampel(Ampel):
 
 
 class Tempampel(Ampel):
-    '''Ampel für die Temperatur '''
+    """Ampel für die Temperatur """
 
     def __init__(self):
         super().__init__()
@@ -559,7 +559,7 @@ class Tempampel(Ampel):
 
 
 class Lautampel(Ampel):
-    ''' Ampel für die Lautstärke '''
+    """ Ampel für die Lautstärke """
 
     def __init__(self):
         super().__init__()
@@ -633,7 +633,7 @@ class Lautampel(Ampel):
 
 
 class Co2ampel(Ampel):
-    '''Ampel für den Co2-Gehalt '''
+    """Ampel für den Co2-Gehalt """
 
     def __init__(self):
         super().__init__()
@@ -710,7 +710,7 @@ class Co2ampel(Ampel):
 
 
 class VerticalLabel(QLabel):
-    '''Verticales Label für den Simpel-Modus um die Ampeln zu beschriften '''
+    """Verticales Label für den Simpel-Modus um die Ampeln zu beschriften """
 
     def __init__(self, *args):
         QLabel.__init__(self, *args)
@@ -741,7 +741,7 @@ class VerticalLabel(QLabel):
 
 
 class Aboutwindow(QWidget):
-    ''' Fenster welches bei About angezeigt wird '''
+    """ Fenster welches bei About angezeigt wird """
 
     def __init__(self, *args, **kwargs):
         super(Aboutwindow, self).__init__(*args, **kwargs)
@@ -1856,14 +1856,14 @@ def grafikdingens():
 
 
 def datenzeugs():
-    '''Datenthread welcher sich um Verbindung, Datenabruf und Datenverarbeitung kümmert '''
+    """Datenthread welcher sich um Verbindung, Datenabruf und Datenverarbeitung kümmert """
     global daten
 
     def dateianlegen():
         """ nimmt die aktualle Zeit und erstellt eine .txt Datei mit der Startzeit als Namen"""
 
         def punktentferner(x):
-            """entfernt die doppelpunkte in der zeit da Dateien keine Doppelpunkt im Namen haben kann"""
+            """entfernt die doppelpunkte in der Zeit da Dateien keine Doppelpunkte im Namen haben kann"""
             stelle = 0
             x = list(x)
             for i in x:
@@ -1921,7 +1921,7 @@ def datenzeugs():
             global deviceconnected, ser
             """ empfängt die daten die vom esp32 gesendet werden,
                 kombiniert sie mit der zeit
-                und speicher die in der oben erstllen .txt datei"""
+                und speicher die in der oben erstellen .txt datei"""
 
             try:
 
@@ -1944,7 +1944,7 @@ def datenzeugs():
             # gibt keinen error aus
 
         def speichern(dateiname, daten):
-            """öffnet die datei schreibt die Daten in die .txt
+            """öffnet, die datei schreibt die Daten in die .txt
             und schließt diese wieder"""
             datenstr = str(daten[0]) + ',' + str(daten[1]) + ',' + \
                        str(daten[2]) + ',' + str(daten[3]) + ',' + \
@@ -1966,7 +1966,10 @@ def datenzeugs():
     dateiname = dateianlegen()
     datenverarbeitung()
 
+
 startpopup = Startwindow()
+
+
 startpopup.zeigen()
 
 
