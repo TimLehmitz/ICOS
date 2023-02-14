@@ -1618,7 +1618,7 @@ class MainWindow(QMainWindow):
                                          'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             tempampelfarbe = 'gelb'
             if self.actiontempwarnungen.isChecked():
-               tempwarnungen = True
+                tempwarnungen = True
 
         elif tempugelbgrenz < daten[1] <= tempogelbgrenz:
             self.temp_line.setPen(QColor(0, 255, 0))
@@ -1631,7 +1631,7 @@ class MainWindow(QMainWindow):
                                          'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             tempampelfarbe = 'gelb'
             if self.actiontempwarnungen.isChecked():
-               tempwarnungen = True
+                tempwarnungen = True
 
         elif daten[1] > temporotgrenz:
             self.temp_line.setPen(QColor(255, 0, 0))
@@ -1849,7 +1849,7 @@ class MainWindow(QMainWindow):
 
 
 def grafikdingens():
-    '''Setup für das Hauptfenster '''
+    """Setup für das Hauptfenster """
     app = QApplication(sys.argv)
     mw = MainWindow()
     mw.show()
@@ -1869,7 +1869,7 @@ def datenzeugs():
             x = list(x)
             for i in x:
                 if i == ':':
-                    i = ' '  # möglichst keine Leerzeichen (was ist noich offen)
+                    i = ' '  # möglichst keine Leerzeichen (was ist noch offen)
                     x[stelle] = i
                 stelle = stelle + 1
             z = ''
