@@ -6,18 +6,24 @@ import time
 
 import numpy as np
 import pyqtgraph as pg
-import serial
+import serial # nessessary?
 import serial.tools.list_ports
+
 from PyQt5 import QtCore, QtGui
 from PyQt5 import QtWidgets, uic
+
 from PyQt5.QtCore import *
 from PyQt5.QtCore import QTime, Qt
+
 from PyQt5.QtGui import *
+from PyQt5.QtGui import QMovie
+
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
-from PyQt5.QtGui import QMovie
+
 
 # Bildschirmgrößen Bestimmung
 # test for gitthub
@@ -112,14 +118,13 @@ print(COM)
 for i in COM:
     try:
         ser = serial.Serial(str(i), baudrate=115200, timeout=2)
-        data = ser.readline().decode('ascii')
+        data = ser.readline().decode('UTF-8')
         datalist = data.split(' ')
         comtestwert = float(datalist[0])
-        print(i)
         deviceconnected = True
         devicecom = i
         break
-    except:
+    except ValueError:
         ser = None
         deviceconnected = False
 
@@ -1928,7 +1933,7 @@ def datenzeugs():
                 hell = float(datalist[4])
                 datentu = time, tempce, luftdruck, co2, laut, hell
 
-            except:
+            except ValueError:
                 time = datetime.datetime.now().strftime("%Y-%m-%d/%H:%M:%S")
                 datentu = (time, 22, 1000, 0, 0, 400)
                 deviceconnected = False
