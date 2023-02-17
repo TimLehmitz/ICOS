@@ -19,7 +19,6 @@ from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
 from PyQt5.QtGui import QMovie
 
-
 # Bildschirmgrößen Bestimmung
 # test for gitthub
 
@@ -126,196 +125,6 @@ for i in COM:
 
 
 # Klassen für verschiedene Elemente
-
-# Uhren
-
-
-class Uhr(QLabel):
-    """Allgemeine Uhren Klasse welche an die verschiedenen Uhren vererbt"""
-
-    def __init__(self):
-        super().__init__()
-
-        self.hPointer = QtGui.QPolygon([QPoint(6, 7),
-                                        QPoint(-6, 7),
-                                        QPoint(0, -50)])
-
-        self.mPointer = QPolygon([QPoint(6, 7),
-                                  QPoint(-6, 7),
-                                  QPoint(0, -70)])
-
-        self.sPointer = QPolygon([QPoint(1, 1),
-                                  QPoint(-1, 1),
-                                  QPoint(0, -90)])
-
-        self.bColor = Qt.darkGreen
-
-        self.sColor = Qt.red
-
-
-class Infouhr(Uhr):
-    """Infouhrklasse für die Uhren im Advanced-Modus """
-
-    def __init__(self):
-        super().__init__()
-
-
-class Startinfouhr(Infouhr):
-    """Zeigt die Startzeit der Messung im Advanced-Modus an """
-
-    def __init__(self):
-        super().__init__()
-
-    def paintEvent(self, event):
-
-        rec = min(self.width(), self.height())
-
-        tik = startzeit
-
-        painter = QPainter(self)
-
-        def zeigermalen(color, rotation, pointer):
-
-            painter.setBrush(QBrush(color))
-
-            painter.save()
-
-            painter.rotate(rotation)
-
-            painter.drawConvexPolygon(pointer)
-
-            painter.restore()
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width() / 2, self.height() / 2)
-
-        painter.scale(rec / 225, rec / 225)
-        painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-
-        painter.drawEllipse(-100, -100, 200, 200)
-        painter.setPen(QtCore.Qt.NoPen)
-
-        zeigermalen(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
-        zeigermalen(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
-        zeigermalen(self.sColor, (6 * tik.second()), self.sPointer)
-
-        painter.setPen(QPen(self.bColor))
-
-        for i in range(0, 60):
-
-            if (i % 5) == 0:
-                painter.drawLine(87, 0, 97, 0)
-
-            painter.rotate(6)
-
-        painter.end()
-
-
-class Endinfouhr(Infouhr):
-    """Zeigt die Endzeit der Messung im Advanced-Modus an"""
-
-    def __init__(self):
-        super().__init__()
-
-    def paintEvent(self, event):
-
-        rec = min(self.width(), self.height())
-
-        tik = endzeit
-
-        painter = QPainter(self)
-
-        def zeigermalen(color, rotation, pointer):
-
-            painter.setBrush(QBrush(color))
-
-            painter.save()
-
-            painter.rotate(rotation)
-
-            painter.drawConvexPolygon(pointer)
-
-            painter.restore()
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width() / 2, self.height() / 2)
-
-        painter.scale(rec / 225, rec / 225)
-        painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-        painter.drawEllipse(-100, -100, 200, 200)
-        painter.setPen(QtCore.Qt.NoPen)
-
-        zeigermalen(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
-        zeigermalen(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
-        zeigermalen(self.sColor, (6 * tik.second()), self.sPointer)
-
-        painter.setPen(QPen(self.bColor))
-
-        for i in range(0, 60):
-
-            if (i % 5) == 0:
-                painter.drawLine(87, 0, 97, 0)
-
-            painter.rotate(6)
-
-        painter.end()
-
-
-class Liveuhr(Uhr):
-    """Liveuhr im Developer-Modus zeigt die aktuelle Zeit """
-
-    def __init__(self):
-        super().__init__()
-        timer = QTimer(self)
-        timer.timeout.connect(self.update)
-        timer.start(1000)
-
-    def paintEvent(self, event):
-
-        rec = min(self.width(), self.height())
-
-        tik = QTime.currentTime()
-
-        painter = QPainter(self)
-
-        def drawPointer(color, rotation, pointer):
-
-            painter.setBrush(QBrush(color))
-
-            painter.save()
-
-            painter.rotate(rotation)
-
-            painter.drawConvexPolygon(pointer)
-
-            painter.restore()
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width() / 2, self.height() / 2)
-
-        painter.scale(rec / 225, rec / 225)
-
-        painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-        painter.drawEllipse(-100, -100, 200, 200)
-        painter.setPen(QtCore.Qt.NoPen)
-
-        drawPointer(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
-        drawPointer(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
-        drawPointer(self.sColor, (6 * tik.second()), self.sPointer)
-
-        painter.setPen(QPen(self.bColor))
-
-        for i in range(0, 60):
-
-            if (i % 5) == 0:
-                painter.drawLine(87, 0, 97, 0)
-
-            painter.rotate(6)
-
-        painter.end()
 
 
 # Ampeln
@@ -762,6 +571,7 @@ class Startwindow(QWidget):
         uic.loadUi('ui/startpopwindow.ui', self)
         self.setWindowTitle('Startpop')
         self.setWindowFlag(Qt.FramelessWindowHint, Qt.WindowStaysOnTopHint)
+
     def zeigen(self):
         self.show()
         self.movie = QMovie("ui/grafiken/startpop.gif")
@@ -795,7 +605,7 @@ class Warnungen(QWidget):
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
         uic.loadUi('ui/allgemeinWarnung.ui', self)
         self.move(bildbreite - self.width(), bildhoehe - self.height())
-        self.resize(int(1920*0.9) // 5, int(1080*1) // 8)
+        self.resize(int(1920 * 0.9) // 5, int(1080 * 1) // 8)
         self.setWindowIcon(QIcon('ui/grafiken/warningIcon.png'))
         self.setWindowTitle('Warnung')
 
@@ -872,7 +682,189 @@ class MainWindow(QMainWindow):
     Klasse des gesamten Hauptfensters mit allen Funktionen und Modi
     """
 
-    tray_icon = None
+    # Uhren
+    class Uhr(QLabel):
+        """Allgemeine Uhren Klasse welche an die verschiedenen Uhren vererbt"""
+
+        def __init__(self):
+            super().__init__()
+
+            self.hPointer = QtGui.QPolygon([QPoint(6, 7),
+                                            QPoint(-6, 7),
+                                            QPoint(0, -50)])
+
+            self.mPointer = QPolygon([QPoint(6, 7),
+                                      QPoint(-6, 7),
+                                      QPoint(0, -70)])
+
+            self.sPointer = QPolygon([QPoint(1, 1),
+                                      QPoint(-1, 1),
+                                      QPoint(0, -90)])
+
+            self.bColor = Qt.darkGreen
+
+            self.sColor = Qt.red
+
+    class Infouhr(Uhr):
+        """Infouhrklasse für die Uhren im Advanced-Modus """
+
+        def __init__(self):
+            super().__init__()
+
+    class Startinfouhr(Infouhr):
+        """Zeigt die Startzeit der Messung im Advanced-Modus an """
+
+        def __init__(self):
+            super().__init__()
+
+        def paintEvent(self, event):
+
+            rec = min(self.width(), self.height())
+
+            tik = startzeit
+
+            painter = QPainter(self)
+
+            def zeigermalen(color, rotation, pointer):
+
+                painter.setBrush(QBrush(color))
+
+                painter.save()
+
+                painter.rotate(rotation)
+
+                painter.drawConvexPolygon(pointer)
+
+                painter.restore()
+
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            painter.translate(self.width() / 2, self.height() / 2)
+
+            painter.scale(rec / 225, rec / 225)
+            painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
+
+            painter.drawEllipse(-100, -100, 200, 200)
+            painter.setPen(QtCore.Qt.NoPen)
+
+            zeigermalen(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
+            zeigermalen(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
+            zeigermalen(self.sColor, (6 * tik.second()), self.sPointer)
+
+            painter.setPen(QPen(self.bColor))
+
+            for i in range(0, 60):
+
+                if (i % 5) == 0:
+                    painter.drawLine(87, 0, 97, 0)
+
+                painter.rotate(6)
+
+            painter.end()
+
+    class Endinfouhr(Infouhr):
+        """Zeigt die Endzeit der Messung im Advanced-Modus an"""
+
+        def __init__(self):
+            super().__init__()
+
+        def paintEvent(self, event):
+
+            rec = min(self.width(), self.height())
+
+            tik = endzeit
+
+            painter = QPainter(self)
+
+            def zeigermalen(color, rotation, pointer):
+
+                painter.setBrush(QBrush(color))
+
+                painter.save()
+
+                painter.rotate(rotation)
+
+                painter.drawConvexPolygon(pointer)
+
+                painter.restore()
+
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            painter.translate(self.width() / 2, self.height() / 2)
+
+            painter.scale(rec / 225, rec / 225)
+            painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
+            painter.drawEllipse(-100, -100, 200, 200)
+            painter.setPen(QtCore.Qt.NoPen)
+
+            zeigermalen(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
+            zeigermalen(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
+            zeigermalen(self.sColor, (6 * tik.second()), self.sPointer)
+
+            painter.setPen(QPen(self.bColor))
+
+            for i in range(0, 60):
+
+                if (i % 5) == 0:
+                    painter.drawLine(87, 0, 97, 0)
+
+                painter.rotate(6)
+
+            painter.end()
+
+    class Liveuhr(Uhr):
+        """Liveuhr im Developer-Modus zeigt die aktuelle Zeit """
+
+        def __init__(self):
+            super().__init__()
+            timer = QTimer(self)
+            timer.timeout.connect(self.update)
+            timer.start(1000)
+
+        def paintEvent(self, event):
+
+            rec = min(self.width(), self.height())
+
+            tik = QTime.currentTime()
+
+            painter = QPainter(self)
+
+            def drawPointer(color, rotation, pointer):
+
+                painter.setBrush(QBrush(color))
+
+                painter.save()
+
+                painter.rotate(rotation)
+
+                painter.drawConvexPolygon(pointer)
+
+                painter.restore()
+
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            painter.translate(self.width() / 2, self.height() / 2)
+
+            painter.scale(rec / 225, rec / 225)
+
+            painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
+            painter.drawEllipse(-100, -100, 200, 200)
+            painter.setPen(QtCore.Qt.NoPen)
+
+            drawPointer(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
+            drawPointer(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
+            drawPointer(self.sColor, (6 * tik.second()), self.sPointer)
+
+            painter.setPen(QPen(self.bColor))
+
+            for i in range(0, 60):
+
+                if (i % 5) == 0:
+                    painter.drawLine(87, 0, 97, 0)
+
+                painter.rotate(6)
+
+            painter.end()
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -1118,13 +1110,13 @@ class MainWindow(QMainWindow):
 
         # setzen der Uhren (Liveuhr und Advanced-Modus Uhren)
         digiuhrfnt = QFont('Arial', 12)
-        self.anauhr = Liveuhr()
+        self.anauhr = MainWindow.Liveuhr()
         self.uhrlayout.addWidget(self.anauhr, 2)
 
-        self.adanauhr1 = Startinfouhr()
+        self.adanauhr1 = MainWindow.Startinfouhr()
         self.adanauhr1.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
                                                            QtWidgets.QSizePolicy.Preferred))
-        self.adanauhr2 = Endinfouhr()
+        self.adanauhr2 = MainWindow.Endinfouhr()
         self.adanauhr2.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
                                                            QtWidgets.QSizePolicy.Preferred))
         self.anfangzeit.addWidget(self.adanauhr1)
@@ -1502,7 +1494,7 @@ class MainWindow(QMainWindow):
             monitor = QDesktopWidget().screenGeometry(display_monitor)
             m0.move(monitor.left(), monitor.top())
             m0.show()
-            print('Monitor: '+str(moni))
+            print('Monitor: ' + str(moni))
 
     def setmoni(self):
         print('Setting Monitor...')
@@ -1600,7 +1592,7 @@ class MainWindow(QMainWindow):
     # live Funktionen für den dev-modus (zeit und werte)
 
     def updatetempce(self):
-        global tempcelist, daten, temporotgrenz, tempogelbgrenz,\
+        global tempcelist, daten, temporotgrenz, tempogelbgrenz, \
             tempurotgrenz, tempugelbgrenz, tempampelfarbe, tempwarnungen
 
         # gibt den derzeitgigen Wert in das LCDWidget
@@ -1972,7 +1964,6 @@ def datenzeugs():
 startpopup = Startwindow()
 startpopup.zeigen()
 
-
 warnungPopup = Warnungen()
 aboutPopup = Aboutwindow()
 gesamtapp = QtWidgets.QApplication(sys.argv)
@@ -1982,7 +1973,5 @@ datenthread = threading.Thread(target=datenzeugs, daemon=True)
 # Starte Thread
 datenthread.start()
 
-
 # Start vom GUI
 grafikdingens()
-
