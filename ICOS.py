@@ -1968,23 +1968,21 @@ def datenzeugs():
     datenverarbeitung()
 
 
+# Startwindow wird initialisiert und gestartet
 startpopup = Startwindow()
-
-
 startpopup.zeigen()
 
 
-gesamtapp = QtWidgets.QApplication(sys.argv)
 warnungPopup = Warnungen()
 aboutPopup = Aboutwindow()
+gesamtapp = QtWidgets.QApplication(sys.argv)
 
-# Erstelle neuen thread
+# Erstelle neuen thread welcher sich um den Datenempfang und verarbeitung kümmert
 datenthread = threading.Thread(target=datenzeugs, daemon=True)
-
 # Starte Thread
 datenthread.start()
 
-# Start vom GUI
 
+# Start vom GUI
 grafikdingens()
 
