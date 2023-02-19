@@ -6,7 +6,7 @@ import time
 
 import numpy as np
 import pyqtgraph as pg
-import serial # nessessary?
+import serial  # nessessary?
 import serial.tools.list_ports
 
 from PyQt5 import QtCore, QtGui
@@ -23,7 +23,6 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
-
 
 # Bildschirmgrößen Bestimmung
 # test for gitthub
@@ -609,12 +608,15 @@ class Warnungen(QWidget):
         super(Warnungen, self).__init__(*args, **kwargs)
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
         uic.loadUi('ui/allgemeinWarnung.ui', self)
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        self.resize(int(bildbreite * 0.9) // 5, int(bildhoehe * 1) // 8)
         self.move(bildbreite - self.width(), bildhoehe - self.height())
-        self.resize(int(1920 * 0.9) // 5, int(1080 * 1) // 8)
         self.setWindowIcon(QIcon('ui/grafiken/warningIcon.png'))
-        self.setWindowTitle('Warnung')
 
         #   self.show()
+
+    def mousePressEvent(self, event):
+        self.close()
 
     def closeEvent(self, event):
         global hellwarnungen, tempwarnungen, lautwarnungen, co2warnungen
@@ -641,43 +643,42 @@ class Warnungen(QWidget):
     def warnungTemphoch(self):
         if tempwarnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">Es ist zu "
-                "heiß</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
-                "Raum!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Es ist zu warm< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
 
     def warnungenTempniedrig(self):
         if tempwarnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">Es ist zu "
-                "kalt</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
-                "Raum!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Es ist zu kalt< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
 
     def warnungLautstaerke(self):
         if lautwarnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">Es ist zu "
-                "laut</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
-                "Raum!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Es ist zu laut< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
 
     def warnungCo2(self):
         if co2warnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">CO2-Gehalt "
-                "</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\"> "
-                "ist zu hoch!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Zu viel CO2< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
 
     def warnungLicht(self):
         if hellwarnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">Es ist zu "
-                "dunkel</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
-                "Raum!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Es ist zu dunkel< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
-
 
 # Hauptfenster-Klasse + Rest
 
