@@ -6,19 +6,24 @@ import time
 
 import numpy as np
 import pyqtgraph as pg
-import serial
+import serial  # nessessary?
 import serial.tools.list_ports
+# anschauen --> https://github.com/pyserial/pyserial-asyncio
+
 from PyQt5 import QtCore, QtGui
 from PyQt5 import QtWidgets, uic
+
 from PyQt5.QtCore import *
 from PyQt5.QtCore import QTime, Qt
+
 from PyQt5.QtGui import *
+from PyQt5.QtGui import QMovie
+
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
-from PyQt5.QtGui import QMovie
-
 
 # Bildschirmgrößen Bestimmung
 # test for gitthub
@@ -113,209 +118,18 @@ print(COM)
 for i in COM:
     try:
         ser = serial.Serial(str(i), baudrate=115200, timeout=2)
-        data = ser.readline().decode('ascii')
+        data = ser.readline().decode('UTF-8')
         datalist = data.split(' ')
         comtestwert = float(datalist[0])
-        print(i)
         deviceconnected = True
         devicecom = i
         break
-    except:
+    except ValueError:
         ser = None
         deviceconnected = False
 
 
 # Klassen für verschiedene Elemente
-
-# Uhren
-
-
-class Uhr(QLabel):
-    """Allgemeine Uhren Klasse welche an die verschiedenen Uhren vererbt"""
-
-    def __init__(self):
-        super().__init__()
-
-        self.hPointer = QtGui.QPolygon([QPoint(6, 7),
-                                        QPoint(-6, 7),
-                                        QPoint(0, -50)])
-
-        self.mPointer = QPolygon([QPoint(6, 7),
-                                  QPoint(-6, 7),
-                                  QPoint(0, -70)])
-
-        self.sPointer = QPolygon([QPoint(1, 1),
-                                  QPoint(-1, 1),
-                                  QPoint(0, -90)])
-
-        self.bColor = Qt.darkGreen
-
-        self.sColor = Qt.red
-
-
-class Infouhr(Uhr):
-    """Infouhrklasse für die Uhren im Advanced-Modus """
-
-    def __init__(self):
-        super().__init__()
-
-
-class Startinfouhr(Infouhr):
-    """Zeigt die Startzeit der Messung im Advanced-Modus an """
-
-    def __init__(self):
-        super().__init__()
-
-    def paintEvent(self, event):
-
-        rec = min(self.width(), self.height())
-
-        tik = startzeit
-
-        painter = QPainter(self)
-
-        def zeigermalen(color, rotation, pointer):
-
-            painter.setBrush(QBrush(color))
-
-            painter.save()
-
-            painter.rotate(rotation)
-
-            painter.drawConvexPolygon(pointer)
-
-            painter.restore()
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width() / 2, self.height() / 2)
-
-        painter.scale(rec / 225, rec / 225)
-        painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-
-        painter.drawEllipse(-100, -100, 200, 200)
-        painter.setPen(QtCore.Qt.NoPen)
-
-        zeigermalen(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
-        zeigermalen(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
-        zeigermalen(self.sColor, (6 * tik.second()), self.sPointer)
-
-        painter.setPen(QPen(self.bColor))
-
-        for i in range(0, 60):
-
-            if (i % 5) == 0:
-                painter.drawLine(87, 0, 97, 0)
-
-            painter.rotate(6)
-
-        painter.end()
-
-
-class Endinfouhr(Infouhr):
-    """Zeigt die Endzeit der Messung im Advanced-Modus an"""
-
-    def __init__(self):
-        super().__init__()
-
-    def paintEvent(self, event):
-
-        rec = min(self.width(), self.height())
-
-        tik = endzeit
-
-        painter = QPainter(self)
-
-        def zeigermalen(color, rotation, pointer):
-
-            painter.setBrush(QBrush(color))
-
-            painter.save()
-
-            painter.rotate(rotation)
-
-            painter.drawConvexPolygon(pointer)
-
-            painter.restore()
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width() / 2, self.height() / 2)
-
-        painter.scale(rec / 225, rec / 225)
-        painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-        painter.drawEllipse(-100, -100, 200, 200)
-        painter.setPen(QtCore.Qt.NoPen)
-
-        zeigermalen(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
-        zeigermalen(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
-        zeigermalen(self.sColor, (6 * tik.second()), self.sPointer)
-
-        painter.setPen(QPen(self.bColor))
-
-        for i in range(0, 60):
-
-            if (i % 5) == 0:
-                painter.drawLine(87, 0, 97, 0)
-
-            painter.rotate(6)
-
-        painter.end()
-
-
-class Liveuhr(Uhr):
-    """Liveuhr im Developer-Modus zeigt die aktuelle Zeit """
-
-    def __init__(self):
-        super().__init__()
-        timer = QTimer(self)
-        timer.timeout.connect(self.update)
-        timer.start(1000)
-
-    def paintEvent(self, event):
-
-        rec = min(self.width(), self.height())
-
-        tik = QTime.currentTime()
-
-        painter = QPainter(self)
-
-        def drawPointer(color, rotation, pointer):
-
-            painter.setBrush(QBrush(color))
-
-            painter.save()
-
-            painter.rotate(rotation)
-
-            painter.drawConvexPolygon(pointer)
-
-            painter.restore()
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width() / 2, self.height() / 2)
-
-        painter.scale(rec / 225, rec / 225)
-
-        painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-        painter.drawEllipse(-100, -100, 200, 200)
-        painter.setPen(QtCore.Qt.NoPen)
-
-        drawPointer(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
-        drawPointer(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
-        drawPointer(self.sColor, (6 * tik.second()), self.sPointer)
-
-        painter.setPen(QPen(self.bColor))
-
-        for i in range(0, 60):
-
-            if (i % 5) == 0:
-                painter.drawLine(87, 0, 97, 0)
-
-            painter.rotate(6)
-
-        painter.end()
 
 
 # Ampeln
@@ -340,83 +154,9 @@ class Ampel(QLabel):
         self.gruenan = QColor(0, 255, 0, 255)
         self.gruenaus = QColor(0, 255, 0, 50)
 
-    def paintEvent(self, event):
-        global farbe
-
-        rec = min(self.width() * 3, self.height())
-
-        painter = QPainter(self)
-
-        def zeichnekreise(farbe='gruen'):
-            if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
-
-                painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
-                painter.drawRect(-100, -300, 200, 600)
-
-                painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-                painter.setBrush(QBrush(self.rotaus))
-                painter.drawEllipse(-95, -290, 190, 190)
-
-                painter.setBrush(QBrush(self.gelbaus))
-                painter.drawEllipse(-95, -95, 190, 190)
-
-                painter.setBrush(QBrush(self.gruenan))
-                painter.drawEllipse(-95, 100, 190, 190)
-            elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
-
-                painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
-                painter.drawRect(-100, -300, 200, 600)
-
-                painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-                painter.setBrush(QBrush(self.rotaus))
-                painter.drawEllipse(-95, -290, 190, 190)
-
-                painter.setBrush(QBrush(self.gelban))
-                painter.drawEllipse(-95, -95, 190, 190)
-
-                painter.setBrush(QBrush(self.gruenaus))
-                painter.drawEllipse(-95, 100, 190, 190)
-            elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
-
-                painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
-                painter.drawRect(-100, -300, 200, 600)
-
-                painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-                painter.setBrush(QBrush(self.rotan))
-                painter.drawEllipse(-95, -290, 190, 190)
-
-                painter.setBrush(QBrush(self.gelbaus))
-                painter.drawEllipse(-95, -95, 190, 190)
-
-                painter.setBrush(QBrush(self.gruenaus))
-                painter.drawEllipse(-95, 100, 190, 190)
-
-            painter.save()
-
-            painter.restore()
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width() / 2, self.height() / 2)
-
-        painter.scale(rec / 610, rec / 610)
-
-        zeichnekreise(farbe=farbe)
-
-        painter.end()
-
 
 class Hellampel(Ampel):
     """Ampel für die Helligkeit """
-
-    def __init__(self):
-        super().__init__()
-
-    def mousePressEvent(self, event):
-        print('hell geklickt')
 
     def paintEvent(self, event):
         global hellampelfarbe
@@ -427,7 +167,6 @@ class Hellampel(Ampel):
 
         def zeichnekreise(farbe='gruen'):
             if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -442,7 +181,6 @@ class Hellampel(Ampel):
                 painter.setBrush(QBrush(self.gruenan))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -457,7 +195,6 @@ class Hellampel(Ampel):
                 painter.setBrush(QBrush(self.gruenaus))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -490,9 +227,6 @@ class Hellampel(Ampel):
 class Tempampel(Ampel):
     """Ampel für die Temperatur """
 
-    def __init__(self):
-        super().__init__()
-
     def paintEvent(self, event):
         global tempampelfarbe
         rec = min(self.width() * 3, self.height())
@@ -501,7 +235,6 @@ class Tempampel(Ampel):
 
         def zeichnekreise(farbe='gruen'):
             if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -516,7 +249,6 @@ class Tempampel(Ampel):
                 painter.setBrush(QBrush(self.gruenan))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -531,7 +263,6 @@ class Tempampel(Ampel):
                 painter.setBrush(QBrush(self.gruenaus))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -564,9 +295,6 @@ class Tempampel(Ampel):
 class Lautampel(Ampel):
     """ Ampel für die Lautstärke """
 
-    def __init__(self):
-        super().__init__()
-
     def paintEvent(self, event):
         global lautampelfarbe
         rec = min(self.width() * 3, self.height())
@@ -575,7 +303,6 @@ class Lautampel(Ampel):
 
         def zeichnekreise(farbe='gruen'):
             if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -590,7 +317,6 @@ class Lautampel(Ampel):
                 painter.setBrush(QBrush(self.gruenan))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -605,7 +331,6 @@ class Lautampel(Ampel):
                 painter.setBrush(QBrush(self.gruenaus))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -638,9 +363,6 @@ class Lautampel(Ampel):
 class Co2ampel(Ampel):
     """Ampel für den Co2-Gehalt """
 
-    def __init__(self):
-        super().__init__()
-
     def paintEvent(self, event):
         global co2ampelfarbe
         rec = min(self.width() * 3, self.height())
@@ -649,7 +371,6 @@ class Co2ampel(Ampel):
 
         def zeichnekreise(farbe='gruen'):
             if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -664,7 +385,6 @@ class Co2ampel(Ampel):
                 painter.setBrush(QBrush(self.gruenan))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -679,7 +399,6 @@ class Co2ampel(Ampel):
                 painter.setBrush(QBrush(self.gruenaus))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -762,6 +481,7 @@ class Startwindow(QWidget):
         uic.loadUi('ui/startpopwindow.ui', self)
         self.setWindowTitle('Startpop')
         self.setWindowFlag(Qt.FramelessWindowHint, Qt.WindowStaysOnTopHint)
+
     def zeigen(self):
         self.show()
         self.movie = QMovie("ui/grafiken/startpop.gif")
@@ -794,12 +514,15 @@ class Warnungen(QWidget):
         super(Warnungen, self).__init__(*args, **kwargs)
         QWidget.__init__(self, None, Qt.WindowStaysOnTopHint)
         uic.loadUi('ui/allgemeinWarnung.ui', self)
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        self.resize(int(bildbreite * 0.9) // 5, int(bildhoehe * 1) // 8)
         self.move(bildbreite - self.width(), bildhoehe - self.height())
-        self.resize(int(1920*0.9) // 5, int(1080*1) // 8)
         self.setWindowIcon(QIcon('ui/grafiken/warningIcon.png'))
-        self.setWindowTitle('Warnung')
 
         #   self.show()
+
+    def mousePressEvent(self, event):
+        self.close()
 
     def closeEvent(self, event):
         global hellwarnungen, tempwarnungen, lautwarnungen, co2warnungen
@@ -826,43 +549,42 @@ class Warnungen(QWidget):
     def warnungTemphoch(self):
         if tempwarnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">Es ist zu "
-                "heiß</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
-                "Raum!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Es ist zu warm< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
 
     def warnungenTempniedrig(self):
         if tempwarnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">Es ist zu "
-                "kalt</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
-                "Raum!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Es ist zu kalt< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
 
     def warnungLautstaerke(self):
         if lautwarnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">Es ist zu "
-                "laut</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
-                "Raum!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Es ist zu laut< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
 
     def warnungCo2(self):
         if co2warnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">CO2-Gehalt "
-                "</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\"> "
-                "ist zu hoch!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Zu viel CO2< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
 
     def warnungLicht(self):
         if hellwarnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">Es ist zu "
-                "dunkel</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
-                "Raum!</span></p></body></html>")
+                "<html><head/><body><p align =\"center\" > < span style =\" font-size:22pt; font-weight:600; "
+                "color:#aa0000;\" >Es ist zu dunkel< / span > < / p > < p > < br / > < / p > < / body > < / html >"
+            )
             self.erscheinen()
-
 
 # Hauptfenster-Klasse + Rest
 
@@ -872,7 +594,189 @@ class MainWindow(QMainWindow):
     Klasse des gesamten Hauptfensters mit allen Funktionen und Modi
     """
 
-    tray_icon = None
+    # Uhren
+    class Uhr(QLabel):
+        """Allgemeine Uhren Klasse welche an die verschiedenen Uhren vererbt"""
+
+        def __init__(self):
+            super().__init__()
+
+            self.hPointer = QtGui.QPolygon([QPoint(6, 7),
+                                            QPoint(-6, 7),
+                                            QPoint(0, -50)])
+
+            self.mPointer = QPolygon([QPoint(6, 7),
+                                      QPoint(-6, 7),
+                                      QPoint(0, -70)])
+
+            self.sPointer = QPolygon([QPoint(1, 1),
+                                      QPoint(-1, 1),
+                                      QPoint(0, -90)])
+
+            self.bColor = Qt.darkGreen
+
+            self.sColor = Qt.red
+
+    class Infouhr(Uhr):
+        """Infouhrklasse für die Uhren im Advanced-Modus """
+
+        def __init__(self):
+            super().__init__()
+
+    class Startinfouhr(Infouhr):
+        """Zeigt die Startzeit der Messung im Advanced-Modus an """
+
+        def __init__(self):
+            super().__init__()
+
+        def paintEvent(self, event):
+
+            rec = min(self.width(), self.height())
+
+            tik = startzeit
+
+            painter = QPainter(self)
+
+            def zeigermalen(color, rotation, pointer):
+
+                painter.setBrush(QBrush(color))
+
+                painter.save()
+
+                painter.rotate(rotation)
+
+                painter.drawConvexPolygon(pointer)
+
+                painter.restore()
+
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            painter.translate(self.width() / 2, self.height() / 2)
+
+            painter.scale(rec / 225, rec / 225)
+            painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
+
+            painter.drawEllipse(-100, -100, 200, 200)
+            painter.setPen(QtCore.Qt.NoPen)
+
+            zeigermalen(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
+            zeigermalen(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
+            zeigermalen(self.sColor, (6 * tik.second()), self.sPointer)
+
+            painter.setPen(QPen(self.bColor))
+
+            for i in range(0, 60):
+
+                if (i % 5) == 0:
+                    painter.drawLine(87, 0, 97, 0)
+
+                painter.rotate(6)
+
+            painter.end()
+
+    class Endinfouhr(Infouhr):
+        """Zeigt die Endzeit der Messung im Advanced-Modus an"""
+
+        def __init__(self):
+            super().__init__()
+
+        def paintEvent(self, event):
+
+            rec = min(self.width(), self.height())
+
+            tik = endzeit
+
+            painter = QPainter(self)
+
+            def zeigermalen(color, rotation, pointer):
+
+                painter.setBrush(QBrush(color))
+
+                painter.save()
+
+                painter.rotate(rotation)
+
+                painter.drawConvexPolygon(pointer)
+
+                painter.restore()
+
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            painter.translate(self.width() / 2, self.height() / 2)
+
+            painter.scale(rec / 225, rec / 225)
+            painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
+            painter.drawEllipse(-100, -100, 200, 200)
+            painter.setPen(QtCore.Qt.NoPen)
+
+            zeigermalen(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
+            zeigermalen(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
+            zeigermalen(self.sColor, (6 * tik.second()), self.sPointer)
+
+            painter.setPen(QPen(self.bColor))
+
+            for i in range(0, 60):
+
+                if (i % 5) == 0:
+                    painter.drawLine(87, 0, 97, 0)
+
+                painter.rotate(6)
+
+            painter.end()
+
+    class Liveuhr(Uhr):
+        """Liveuhr im Developer-Modus zeigt die aktuelle Zeit """
+
+        def __init__(self):
+            super().__init__()
+            timer = QTimer(self)
+            timer.timeout.connect(self.update)
+            timer.start(1000)
+
+        def paintEvent(self, event):
+
+            rec = min(self.width(), self.height())
+
+            tik = QTime.currentTime()
+
+            painter = QPainter(self)
+
+            def drawPointer(color, rotation, pointer):
+
+                painter.setBrush(QBrush(color))
+
+                painter.save()
+
+                painter.rotate(rotation)
+
+                painter.drawConvexPolygon(pointer)
+
+                painter.restore()
+
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            painter.translate(self.width() / 2, self.height() / 2)
+
+            painter.scale(rec / 225, rec / 225)
+
+            painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
+            painter.drawEllipse(-100, -100, 200, 200)
+            painter.setPen(QtCore.Qt.NoPen)
+
+            drawPointer(self.bColor, (30 * (tik.hour() + tik.minute() / 60)), self.hPointer)
+            drawPointer(self.bColor, (6 * (tik.minute() + tik.second() / 60)), self.mPointer)
+            drawPointer(self.sColor, (6 * tik.second()), self.sPointer)
+
+            painter.setPen(QPen(self.bColor))
+
+            for i in range(0, 60):
+
+                if (i % 5) == 0:
+                    painter.drawLine(87, 0, 97, 0)
+
+                painter.rotate(6)
+
+            painter.end()
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -1118,13 +1022,13 @@ class MainWindow(QMainWindow):
 
         # setzen der Uhren (Liveuhr und Advanced-Modus Uhren)
         digiuhrfnt = QFont('Arial', 12)
-        self.anauhr = Liveuhr()
+        self.anauhr = MainWindow.Liveuhr()
         self.uhrlayout.addWidget(self.anauhr, 2)
 
-        self.adanauhr1 = Startinfouhr()
+        self.adanauhr1 = MainWindow.Startinfouhr()
         self.adanauhr1.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
                                                            QtWidgets.QSizePolicy.Preferred))
-        self.adanauhr2 = Endinfouhr()
+        self.adanauhr2 = MainWindow.Endinfouhr()
         self.adanauhr2.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
                                                            QtWidgets.QSizePolicy.Preferred))
         self.anfangzeit.addWidget(self.adanauhr1)
@@ -1179,7 +1083,7 @@ class MainWindow(QMainWindow):
 
         # Monitor anzeige
 
-        self.monishowbutton.clicked.connect(self.showmoni)
+        self.reloadmonisbutton.clicked.connect(self.reloadmonitors)
         self.monifestbutton.clicked.connect(self.setmoni)
 
         # Scaling zum Bildschirm beim Start
@@ -1196,7 +1100,7 @@ class MainWindow(QMainWindow):
 
     # modus ändern funktionen
 
-    def changetosimpel(self):
+    def changetosimpel(self, plhaltervar):
         self.uimode.setCurrentIndex(1)
         self.resize(bildbreite // 10, int(bildhoehe) - 30)
         # print(bildbreite // 10, int(bildhoehe) - 30)
@@ -1229,7 +1133,7 @@ class MainWindow(QMainWindow):
 
     # zugroßample funktionen
 
-    def zugroampelhell(self):
+    def zugroampelhell(self, plhaltervar):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Hellampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1237,7 +1141,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Helligkeit')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampeltemp(self):
+    def zugroampeltemp(self, plhaltervar):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Tempampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1245,7 +1149,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Temperatur')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampellaut(self):
+    def zugroampellaut(self, plhaltervar):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Lautampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1253,7 +1157,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Lautstärke')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampelco2(self):
+    def zugroampelco2(self, plhaltervar):
 
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Co2ampel()
@@ -1493,16 +1397,12 @@ class MainWindow(QMainWindow):
         grenzdaten.writelines(grenzen)
         grenzdaten.close()
 
-    def showmoni(self):
-        print('Screenanzahl: ' + str(screencounter))
-        for moni in range(screencounter):
-            display_monitor = moni
-            m0 = Moniindi()
-            m0.infolabel.setText(str(moni))
-            monitor = QDesktopWidget().screenGeometry(display_monitor)
-            m0.move(monitor.left(), monitor.top())
-            m0.show()
-            print('Monitor: '+str(moni))
+    def reloadmonitors(self):
+
+        print(str(screencounter))
+        for b in range(1, screencounter+1):
+            button = QPushButton(str(b), self)
+            self.monilayout.addWidget(button)
 
     def setmoni(self):
         print('Setting Monitor...')
@@ -1600,7 +1500,7 @@ class MainWindow(QMainWindow):
     # live Funktionen für den dev-modus (zeit und werte)
 
     def updatetempce(self):
-        global tempcelist, daten, temporotgrenz, tempogelbgrenz,\
+        global tempcelist, daten, temporotgrenz, tempogelbgrenz, \
             tempurotgrenz, tempugelbgrenz, tempampelfarbe, tempwarnungen
 
         # gibt den derzeitgigen Wert in das LCDWidget
@@ -1936,7 +1836,7 @@ def datenzeugs():
                 hell = float(datalist[4])
                 datentu = time, tempce, luftdruck, co2, laut, hell
 
-            except:
+            except ValueError:
                 time = datetime.datetime.now().strftime("%Y-%m-%d/%H:%M:%S")
                 datentu = (time, 22, 1000, 0, 0, 400)
                 deviceconnected = False
@@ -1968,23 +1868,22 @@ def datenzeugs():
     datenverarbeitung()
 
 
+# Startwindow wird initialisiert und gestartet
 startpopup = Startwindow()
-
-
 startpopup.zeigen()
 
+#indikator
+#indikator = Moniindi()
+#indikator.show()
 
-gesamtapp = QtWidgets.QApplication(sys.argv)
 warnungPopup = Warnungen()
 aboutPopup = Aboutwindow()
+gesamtapp = QtWidgets.QApplication(sys.argv)
 
-# Erstelle neuen thread
+# Erstelle neuen thread welcher sich um den Datenempfang und verarbeitung kümmert
 datenthread = threading.Thread(target=datenzeugs, daemon=True)
-
 # Starte Thread
 datenthread.start()
 
 # Start vom GUI
-
 grafikdingens()
-
