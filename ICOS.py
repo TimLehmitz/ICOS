@@ -8,6 +8,7 @@ import numpy as np
 import pyqtgraph as pg
 import serial  # nessessary?
 import serial.tools.list_ports
+# anschauen --> https://github.com/pyserial/pyserial-asyncio
 
 from PyQt5 import QtCore, QtGui
 from PyQt5 import QtWidgets, uic
@@ -153,83 +154,9 @@ class Ampel(QLabel):
         self.gruenan = QColor(0, 255, 0, 255)
         self.gruenaus = QColor(0, 255, 0, 50)
 
-    def paintEvent(self, event):
-        global farbe
-
-        rec = min(self.width() * 3, self.height())
-
-        painter = QPainter(self)
-
-        def zeichnekreise(farbe='gruen'):
-            if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
-
-                painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
-                painter.drawRect(-100, -300, 200, 600)
-
-                painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-                painter.setBrush(QBrush(self.rotaus))
-                painter.drawEllipse(-95, -290, 190, 190)
-
-                painter.setBrush(QBrush(self.gelbaus))
-                painter.drawEllipse(-95, -95, 190, 190)
-
-                painter.setBrush(QBrush(self.gruenan))
-                painter.drawEllipse(-95, 100, 190, 190)
-            elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
-
-                painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
-                painter.drawRect(-100, -300, 200, 600)
-
-                painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-                painter.setBrush(QBrush(self.rotaus))
-                painter.drawEllipse(-95, -290, 190, 190)
-
-                painter.setBrush(QBrush(self.gelban))
-                painter.drawEllipse(-95, -95, 190, 190)
-
-                painter.setBrush(QBrush(self.gruenaus))
-                painter.drawEllipse(-95, 100, 190, 190)
-            elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
-
-                painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
-                painter.drawRect(-100, -300, 200, 600)
-
-                painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
-                painter.setBrush(QBrush(self.rotan))
-                painter.drawEllipse(-95, -290, 190, 190)
-
-                painter.setBrush(QBrush(self.gelbaus))
-                painter.drawEllipse(-95, -95, 190, 190)
-
-                painter.setBrush(QBrush(self.gruenaus))
-                painter.drawEllipse(-95, 100, 190, 190)
-
-            painter.save()
-
-            painter.restore()
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width() / 2, self.height() / 2)
-
-        painter.scale(rec / 610, rec / 610)
-
-        zeichnekreise(farbe=farbe)
-
-        painter.end()
-
 
 class Hellampel(Ampel):
     """Ampel für die Helligkeit """
-
-    def __init__(self):
-        super().__init__()
-
-    def mousePressEvent(self, event):
-        print('hell geklickt')
 
     def paintEvent(self, event):
         global hellampelfarbe
@@ -240,7 +167,6 @@ class Hellampel(Ampel):
 
         def zeichnekreise(farbe='gruen'):
             if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -255,7 +181,6 @@ class Hellampel(Ampel):
                 painter.setBrush(QBrush(self.gruenan))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -270,7 +195,6 @@ class Hellampel(Ampel):
                 painter.setBrush(QBrush(self.gruenaus))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -303,9 +227,6 @@ class Hellampel(Ampel):
 class Tempampel(Ampel):
     """Ampel für die Temperatur """
 
-    def __init__(self):
-        super().__init__()
-
     def paintEvent(self, event):
         global tempampelfarbe
         rec = min(self.width() * 3, self.height())
@@ -314,7 +235,6 @@ class Tempampel(Ampel):
 
         def zeichnekreise(farbe='gruen'):
             if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -329,7 +249,6 @@ class Tempampel(Ampel):
                 painter.setBrush(QBrush(self.gruenan))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -344,7 +263,6 @@ class Tempampel(Ampel):
                 painter.setBrush(QBrush(self.gruenaus))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -377,9 +295,6 @@ class Tempampel(Ampel):
 class Lautampel(Ampel):
     """ Ampel für die Lautstärke """
 
-    def __init__(self):
-        super().__init__()
-
     def paintEvent(self, event):
         global lautampelfarbe
         rec = min(self.width() * 3, self.height())
@@ -388,7 +303,6 @@ class Lautampel(Ampel):
 
         def zeichnekreise(farbe='gruen'):
             if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -403,7 +317,6 @@ class Lautampel(Ampel):
                 painter.setBrush(QBrush(self.gruenan))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -418,7 +331,6 @@ class Lautampel(Ampel):
                 painter.setBrush(QBrush(self.gruenaus))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -451,9 +363,6 @@ class Lautampel(Ampel):
 class Co2ampel(Ampel):
     """Ampel für den Co2-Gehalt """
 
-    def __init__(self):
-        super().__init__()
-
     def paintEvent(self, event):
         global co2ampelfarbe
         rec = min(self.width() * 3, self.height())
@@ -462,7 +371,6 @@ class Co2ampel(Ampel):
 
         def zeichnekreise(farbe='gruen'):
             if farbe == 'gruen':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -477,7 +385,6 @@ class Co2ampel(Ampel):
                 painter.setBrush(QBrush(self.gruenan))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'gelb':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -492,7 +399,6 @@ class Co2ampel(Ampel):
                 painter.setBrush(QBrush(self.gruenaus))
                 painter.drawEllipse(-95, 100, 190, 190)
             elif farbe == 'rot':
-                painter.setPen(QtCore.Qt.NoPen)
 
                 painter.setPen(QPen(Qt.white, 3, Qt.SolidLine))
                 painter.drawRect(-100, -300, 200, 600)
@@ -1177,7 +1083,7 @@ class MainWindow(QMainWindow):
 
         # Monitor anzeige
 
-        self.monishowbutton.clicked.connect(self.showmoni)
+        self.reloadmonisbutton.clicked.connect(self.reloadmonitors)
         self.monifestbutton.clicked.connect(self.setmoni)
 
         # Scaling zum Bildschirm beim Start
@@ -1194,7 +1100,7 @@ class MainWindow(QMainWindow):
 
     # modus ändern funktionen
 
-    def changetosimpel(self):
+    def changetosimpel(self, plhaltervar):
         self.uimode.setCurrentIndex(1)
         self.resize(bildbreite // 10, int(bildhoehe) - 30)
         # print(bildbreite // 10, int(bildhoehe) - 30)
@@ -1227,7 +1133,7 @@ class MainWindow(QMainWindow):
 
     # zugroßample funktionen
 
-    def zugroampelhell(self):
+    def zugroampelhell(self, plhaltervar):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Hellampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1235,7 +1141,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Helligkeit')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampeltemp(self):
+    def zugroampeltemp(self, plhaltervar):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Tempampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1243,7 +1149,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Temperatur')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampellaut(self):
+    def zugroampellaut(self, plhaltervar):
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Lautampel()
         self.groampellayout.addWidget(self.groampel)
@@ -1251,7 +1157,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('Lautstärke')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    def zugroampelco2(self):
+    def zugroampelco2(self, plhaltervar):
 
         self.groampellayout.removeWidget(self.groampel)
         self.groampel = Co2ampel()
@@ -1491,16 +1397,12 @@ class MainWindow(QMainWindow):
         grenzdaten.writelines(grenzen)
         grenzdaten.close()
 
-    def showmoni(self):
-        print('Screenanzahl: ' + str(screencounter))
-        for moni in range(screencounter):
-            display_monitor = moni
-            m0 = Moniindi()
-            m0.infolabel.setText(str(moni))
-            monitor = QDesktopWidget().screenGeometry(display_monitor)
-            m0.move(monitor.left(), monitor.top())
-            m0.show()
-            print('Monitor: ' + str(moni))
+    def reloadmonitors(self):
+
+        print(str(screencounter))
+        for b in range(1, screencounter+1):
+            button = QPushButton(str(b), self)
+            self.monilayout.addWidget(button)
 
     def setmoni(self):
         print('Setting Monitor...')
@@ -1969,6 +1871,10 @@ def datenzeugs():
 # Startwindow wird initialisiert und gestartet
 startpopup = Startwindow()
 startpopup.zeigen()
+
+#indikator
+#indikator = Moniindi()
+#indikator.show()
 
 warnungPopup = Warnungen()
 aboutPopup = Aboutwindow()
