@@ -45,7 +45,7 @@ co2list = np.full(60, 500)
 lautlist = np.full(60, 50)
 helllist = np.full(60, 400)
 
-grenzdaten = open('../ui/einstellungen/grenzen.txt', 'r')
+grenzdaten = open('../src/ui/einstellungen/grenzen.txt', 'r')
 grenzen = grenzdaten.readlines()
 temporotgrenz = int(grenzen[3])
 tempogelbgrenz = int(grenzen[1])
@@ -719,7 +719,7 @@ class Aboutwindow(QWidget):
     def __init__(self, *args, **kwargs):
         super(Aboutwindow, self).__init__(*args, **kwargs)
         uic.loadUi('ui/aboutwindow.ui', self)
-        self.setWindowIcon(QIcon('../ui/grafiken/icon.png'))
+        self.setWindowIcon(QIcon('../src/ui/grafiken/icon.png'))
         self.setWindowTitle('About')
 
 
@@ -731,7 +731,7 @@ class Warnungen(QWidget):
         super(Warnungen, self).__init__(*args, **kwargs)
         uic.loadUi('ui/allgemeinWarnung.ui', self)
         self.move((bildbreite - 360), (bildhoehe - 150))
-        self.setWindowIcon(QIcon('../ui/grafiken/warningIcon.png'))
+        self.setWindowIcon(QIcon('../src/ui/grafiken/warningIcon.png'))
         self.setWindowTitle('Warnung')
         self.warntimer = QTimer()
         self.warntimer.setSingleShot(True)
@@ -810,11 +810,11 @@ class MainWindow(QMainWindow):
         uic.loadUi("ui/mainw.ui", self)
 
         # window icon
-        self.setWindowIcon(QIcon('../ui/grafiken/icon.png'))
+        self.setWindowIcon(QIcon('../src/ui/grafiken/icon.png'))
         self.setWindowTitle('ICOS')
         # Init QSystemTrayIcon
         self.tray_icon = QSystemTrayIcon(self)
-        icon = QIcon('../ui/grafiken/icon.png')
+        icon = QIcon('../src/ui/grafiken/icon.png')
         self.tray_icon.setIcon(icon)
 
         # Einstellung für Graphdingens
@@ -1369,7 +1369,7 @@ class MainWindow(QMainWindow):
         self.hellurotgrenz_line.setData(hellurotgrenzlist)
         self.hellugelbgrenz_line.setData(hellugelbgrenzlist)
 
-        grenzdaten = open('../ui/einstellungen/grenzen.txt', 'r')
+        grenzdaten = open('../src/ui/einstellungen/grenzen.txt', 'r')
         grenzen = grenzdaten.readlines()
         grenzen[3] = str(temporotgrenz) + '\n'
         grenzen[1] = str(tempogelbgrenz) + '\n'
@@ -1388,7 +1388,7 @@ class MainWindow(QMainWindow):
         grenzen[23] = str(hellurotgrenz) + '\n'
         grenzen[21] = str(hellugelbgrenz) + '\n'
 
-        grenzdaten = open('../ui/einstellungen/grenzen.txt', 'w')
+        grenzdaten = open('../src/ui/einstellungen/grenzen.txt', 'w')
         grenzdaten.writelines(grenzen)
         grenzdaten.close()
 
@@ -1480,7 +1480,7 @@ class MainWindow(QMainWindow):
         self.actionhellwarnungen.setChecked(0)
 
     def openhilfe(self):
-        os.startfile('../info+hilfe/Standardprobleme.pdf')
+        os.startfile('../src/info+hilfe/Standardprobleme.pdf')
 
     # live funktionen für den dev modus (zeit und werte)
 

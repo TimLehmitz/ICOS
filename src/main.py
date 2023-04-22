@@ -468,7 +468,7 @@ class Aboutwindow(QWidget):
     def __init__(self, *args, **kwargs):
         super(Aboutwindow, self).__init__(*args, **kwargs)
         uic.loadUi('ui/aboutwindow.ui', self)
-        self.setWindowIcon(QIcon('ui/grafiken/Icon.png'))
+        self.setWindowIcon(QIcon('ui/grafiken/icon.png'))
         self.setWindowTitle('About')
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
@@ -1495,7 +1495,7 @@ class MainWindow(QMainWindow):
         self.actionhellwarnungen.setChecked(0)
 
     def openhilfe(self):
-        os.startfile('info+hilfe\\Standardprobleme.pdf')
+        os.startfile('info+hilfe/Standardprobleme.pdf')
 
     # live Funktionen für den dev-modus (zeit und werte)
 
@@ -1807,7 +1807,7 @@ def datenzeugs():
                     deviceconnected = False
                     print(len(COM))
                     if COM == [''] and treiber == False:
-                        os.startfile('CP2102-windows-installer\\pololu-cp2102-setup-x64.exe')
+                        os.startfile('../CP2102-windows-installer/pololu-cp2102-setup-x64.exe')
                         treiber = True
                     else:
                         treiber = True
