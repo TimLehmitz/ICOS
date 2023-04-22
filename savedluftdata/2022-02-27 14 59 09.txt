@@ -1,2 +1,0 @@
-time,tempce,luftdruck,co2,laut,hell
-2022-02-27/14:59:13,22,1000,0,0,400
