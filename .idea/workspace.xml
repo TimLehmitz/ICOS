@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="11a85bdc-93fc-4ff7-b335-7f762c0f494c" name="Changes" comment="marked folders in pycharm as test and source">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/glichwatch.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ICOS.iml" afterDir="false" />
+    <list default="true" id="11a85bdc-93fc-4ff7-b335-7f762c0f494c" name="Changes" comment="worked on .gitignore">
+      <change afterPath="$PROJECT_DIR$/src/ampel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -295,7 +295,21 @@
       <option name="project" value="LOCAL" />
       <updated>1682163765728</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="worked in .idea to find out what to da">
+      <created>1682164519008</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1682164519008</updated>
+    </task>
+    <task id="LOCAL-00009" summary="worked on .gitignore">
+      <created>1682164637384</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1682164637384</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -331,7 +345,9 @@
     <MESSAGE value="moved stuff into other folder" />
     <MESSAGE value="moved directories into src folder" />
     <MESSAGE value="marked folders in pycharm as test and source" />
-    <option name="LAST_COMMIT_MESSAGE" value="marked folders in pycharm as test and source" />
+    <MESSAGE value="worked in .idea to find out what to da" />
+    <MESSAGE value="worked on .gitignore" />
+    <option name="LAST_COMMIT_MESSAGE" value="worked on .gitignore" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ICOS$main.coverage" NAME="main Coverage Results" MODIFIED="1682163172314" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
