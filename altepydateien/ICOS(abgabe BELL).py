@@ -1,51 +1,46 @@
-from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
-from PyQt5 import QtWidgets, uic
-import pyqtgraph as pg
-import numpy as np
-from PyQt5.QtWidgets import QApplication, QFileDialog
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import QTime, Qt
-import serial
 import datetime
-import threading
-import serial.tools.list_ports
-import time
-from PyQt5.QtWidgets import *
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-import sys
 import os
-#import ctypes
-# imports die grad nicht verwendet werden
-# QApplication, QLabel, QGridLayout, QWidget, QCheckBox,
-# from random import randint
-# from PyQt5.QtCore import QTimer, QTime, Qt, QDir
-# from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
+import sys
+import threading
+import time
 
-# standart wert für die daten da damit das programm nicht crasht wenn kein device conn
+import numpy as np
+import pyqtgraph as pg
+import serial
+import serial.tools.list_ports
+from PyQt5 import QtCore, QtGui
+from PyQt5 import QtWidgets, uic
+from PyQt5.QtCore import *
+from PyQt5.QtCore import QTime, Qt
+from PyQt5.QtGui import *
+from PyQt5.QtGui import QFont
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QApplication, QFileDialog
+from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
+
+# Bildschirmgrößen Bestimmung
+
 auflwidget = QtWidgets.QApplication(sys.argv)
-
 screen = auflwidget.primaryScreen()
-print('Screen: %s' % screen.name())
 bild = screen.size()
-print('Size: %d x %d' % (bild.width(), bild.height()))
 bildohnetaskl = screen.availableGeometry()
-print('Available: %d x %d' % (bildohnetaskl.width(), bildohnetaskl.height()))
 bildbreite = int(bildohnetaskl.width())
 bildhoehe = int(bildohnetaskl.height())
-print(bildhoehe)
 
-daten = '2021-08-16/16:58:04', 25, 51.0, 669.0, 50.0, 69.0
+# Startwert für Daten
+
+daten = '2021-08-16/16:58:04', 22, 1000, 0, 50.0, 400
 
 # erstellung von leeren listen für die graphen
-tempcelist = np.full(60, 22)
-luftdrucklist = np.full(60, 60)
-co2list = np.full(60, 500)
-lautlist = np.full(60, 50)
-helllist = np.full(60, 400)
 
-grenzdaten = open('ui/einstellungen/grenzen.txt', 'r')
+tempcelist = np.full(300, 22)
+luftdrucklist = np.full(300, 1000)
+co2list = np.full(300, 0)
+lautlist = np.full(300, 0)
+helllist = np.full(300, 400)
+
+grenzdaten = open('../ui/einstellungen/grenzen.txt', 'r')
 grenzen = grenzdaten.readlines()
 temporotgrenz = int(grenzen[3])
 tempogelbgrenz = int(grenzen[1])
@@ -64,49 +59,36 @@ lautogelbgrenz = int(grenzen[17])
 hellurotgrenz = int(grenzen[23])
 hellugelbgrenz = int(grenzen[21])
 grenzdaten.close()
+
 # grenzlisten
-temporotgrenzlist = np.full(60, temporotgrenz)
-tempogelbgrenzlist = np.full(60, tempogelbgrenz)
-tempurotgrenzlist = np.full(60, tempurotgrenz)
-tempugelbgrenzlist = np.full(60, tempugelbgrenz)
 
-luftdruckogrenzlist = np.full(60, luftdruckogrenz)
-luftdruckugrenzlist = np.full(60, luftdruckugrenz)
+temporotgrenzlist = np.full(300, temporotgrenz)
+tempogelbgrenzlist = np.full(300, tempogelbgrenz)
+tempurotgrenzlist = np.full(300, tempurotgrenz)
+tempugelbgrenzlist = np.full(300, tempugelbgrenz)
 
-co2orotgrenzlist = np.full(60, co2orotgrenz)
-co2ogelbgrenzlist = np.full(60, co2ogelbgrenz)
+luftdruckogrenzlist = np.full(300, luftdruckogrenz)
+luftdruckugrenzlist = np.full(300, luftdruckugrenz)
 
-lautorotgrenzlist = np.full(60, lautorotgrenz)
-lautogelbgrenzlist = np.full(60, lautogelbgrenz)
+co2orotgrenzlist = np.full(300, co2orotgrenz)
+co2ogelbgrenzlist = np.full(300, co2ogelbgrenz)
 
-hellurotgrenzlist = np.full(60, hellurotgrenz)
-hellugelbgrenzlist = np.full(60, hellugelbgrenz)
+lautorotgrenzlist = np.full(300, lautorotgrenz)
+lautogelbgrenzlist = np.full(300, lautogelbgrenz)
+
+hellurotgrenzlist = np.full(300, hellurotgrenz)
+hellugelbgrenzlist = np.full(300, hellugelbgrenz)
 
 dateiausgabe = ''
 
-# dinge die am anfang asugeführrt werden müssen
-#myappid = 'glichoverwatch'  # arbitrary string
-#ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid.encode('utf-8'))
+# Variablen Definition
 
 tempwarnungen = True
 lautwarnungen = True
 co2warnungen = True
 hellwarnungen = True
-
-COM = [comport.device for comport in serial.tools.list_ports.comports()]
-print(COM)
-for i in COM:
-    try:
-        ser = serial.Serial(str(i), baudrate=115200, timeout=1)
-        data = ser.readline().decode('ascii')
-        datalist = data.split(' ')
-        comtestwert = float(datalist[0])
-        print(i)
-        deviceconnected = True
-        break
-    except:
-        ser = None
-        deviceconnected = False
+deviceconnected = False
+treiber = False
 
 startzeit = QTime(0, 0, 0)
 endzeit = QTime(0, 0, 0)
@@ -115,15 +97,33 @@ tempampelfarbe = 'gruen'
 lautampelfarbe = 'gruen'
 co2ampelfarbe = 'gruen'
 
+# erster Verbindungsversuch
+
+COM = [comport.device for comport in serial.tools.list_ports.comports()]
+print(COM)
+for i in COM:
+    try:
+        ser = serial.Serial(str(i), baudrate=115200, timeout=2)
+        data = ser.readline().decode('ascii')
+        datalist = data.split(' ')
+        comtestwert = float(datalist[0])
+        print(i)
+        deviceconnected = True
+        devicecom = i
+        break
+    except:
+        ser = None
+        deviceconnected = False
+
 
 # Klassen für verschiedene Elemente
 
 # Uhren
 
 
-class Clock(QLabel):
+class Uhr(QLabel):
+    '''Allgemeine Uhren Klasse welche an die verschieden Uhren vererbt'''
 
-    # constructor
     def __init__(self):
         super().__init__()
 
@@ -144,12 +144,16 @@ class Clock(QLabel):
         self.sColor = Qt.red
 
 
-class Infouhr(Clock):
+class Infouhr(Uhr):
+    '''Infouhrklasse für die Uhren im Advanced-Modus '''
+
     def __init__(self):
         super().__init__()
 
 
 class Startinfouhr(Infouhr):
+    '''Zeigt die Startzeit der Messung im Advanced-Modus an '''
+
     def __init__(self):
         super().__init__()
 
@@ -177,7 +181,7 @@ class Startinfouhr(Infouhr):
 
         painter.translate(self.width() / 2, self.height() / 2)
 
-        painter.scale(rec / 200, rec / 200)
+        painter.scale(rec / 225, rec / 225)
         painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
 
         painter.drawEllipse(-100, -100, 200, 200)
@@ -200,6 +204,8 @@ class Startinfouhr(Infouhr):
 
 
 class Endinfouhr(Infouhr):
+    '''Zeigt die Endzeit der Messung im Advanced-Modus an'''
+
     def __init__(self):
         super().__init__()
 
@@ -227,7 +233,7 @@ class Endinfouhr(Infouhr):
 
         painter.translate(self.width() / 2, self.height() / 2)
 
-        painter.scale(rec / 200, rec / 200)
+        painter.scale(rec / 225, rec / 225)
         painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
         painter.drawEllipse(-100, -100, 200, 200)
         painter.setPen(QtCore.Qt.NoPen)
@@ -248,7 +254,9 @@ class Endinfouhr(Infouhr):
         painter.end()
 
 
-class Liveuhr(Clock):
+class Liveuhr(Uhr):
+    '''Liveuhr im Developer-Modus zeigt die aktuelle Zeit '''
+
     def __init__(self):
         super().__init__()
         timer = QTimer(self)
@@ -279,7 +287,7 @@ class Liveuhr(Clock):
 
         painter.translate(self.width() / 2, self.height() / 2)
 
-        painter.scale(rec / 200, rec / 200)
+        painter.scale(rec / 225, rec / 225)
 
         painter.setPen(QPen(Qt.color1, 1, Qt.SolidLine))
         painter.drawEllipse(-100, -100, 200, 200)
@@ -305,6 +313,8 @@ class Liveuhr(Clock):
 
 
 class Ampel(QLabel):
+    '''Basis Ampelklasse vererbt an die spezifischen Ampeln '''
+
     def __init__(self):
         super().__init__()
         timer = QTimer(self)
@@ -391,6 +401,8 @@ class Ampel(QLabel):
 
 
 class Hellampel(Ampel):
+    '''Ampel für die Helligkeit '''
+
     def __init__(self):
         super().__init__()
 
@@ -467,6 +479,8 @@ class Hellampel(Ampel):
 
 
 class Tempampel(Ampel):
+    '''Ampel für die Temperatur '''
+
     def __init__(self):
         super().__init__()
 
@@ -539,6 +553,8 @@ class Tempampel(Ampel):
 
 
 class Lautampel(Ampel):
+    ''' Ampel für die Lautstärke '''
+
     def __init__(self):
         super().__init__()
 
@@ -611,6 +627,8 @@ class Lautampel(Ampel):
 
 
 class Co2ampel(Ampel):
+    '''Ampel für den Co2-Gehalt '''
+
     def __init__(self):
         super().__init__()
 
@@ -686,6 +704,7 @@ class Co2ampel(Ampel):
 
 
 class VerticalLabel(QLabel):
+    '''Verticales Label für den Simpel-Modus um die Ampeln zu beschriften '''
 
     def __init__(self, *args):
         QLabel.__init__(self, *args)
@@ -716,10 +735,12 @@ class VerticalLabel(QLabel):
 
 
 class Aboutwindow(QWidget):
+    ''' Fenster welches bei About angezeigt wird '''
+
     def __init__(self, *args, **kwargs):
         super(Aboutwindow, self).__init__(*args, **kwargs)
         uic.loadUi('ui/aboutwindow.ui', self)
-        self.setWindowIcon(QIcon('ui/grafiken/Icon.png'))
+        self.setWindowIcon(QIcon('../ui/grafiken/icon.png'))
         self.setWindowTitle('About')
 
 
@@ -727,19 +748,30 @@ class Aboutwindow(QWidget):
 
 
 class Warnungen(QWidget):
+    '''Algemeine Klasse für Warnungen aller Art '''
+
     def __init__(self, *args, **kwargs):
         super(Warnungen, self).__init__(*args, **kwargs)
+        QWidget.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
         uic.loadUi('ui/allgemeinWarnung.ui', self)
         self.move((bildbreite - 360), (bildhoehe - 150))
-        self.setWindowIcon(QIcon('ui/grafiken/warningIcon.png'))
+        self.setWindowIcon(QIcon('../ui/grafiken/warningIcon.png'))
         self.setWindowTitle('Warnung')
-        self.warntimer = QTimer()
-        self.warntimer.setSingleShot(True)
 
         #   self.show()
 
     def closeEvent(self, event):
+        global hellwarnungen, tempwarnungen, lautwarnungen, co2warnungen
+
         event.ignore()
+        if hellampelfarbe == 'rot':
+            hellwarnungen = False
+        if tempampelfarbe == 'rot':
+            tempwarnungen = False
+        if lautampelfarbe == 'rot':
+            lautwarnungen = False
+        if co2ampelfarbe == 'rot':
+            co2warnungen = False
         self.hide()
 
     def erscheinen(self):
@@ -749,7 +781,6 @@ class Warnungen(QWidget):
     def verschwinden(self):
         if hellampelfarbe != 'rot' and tempampelfarbe != 'rot' and lautampelfarbe != 'rot' and co2ampelfarbe != 'rot':
             self.hide()
-
 
     def warnungTemphoch(self):
         if tempwarnungen:
@@ -778,8 +809,8 @@ class Warnungen(QWidget):
     def warnungCo2(self):
         if co2warnungen:
             self.textLabel.setText(
-                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">Der CO2 "
-                "Gehalt ist zu hoch</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
+                "<html><head/><body><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">CO2 "
+                "ist zu hoch</span></p><p><span style=\" font-size:22pt; font-weight:600; color:#aa0000;\">im "
                 "Raum!</span></p></body></html>")
             self.erscheinen()
 
@@ -797,54 +828,62 @@ class Warnungen(QWidget):
 
 class MainWindow(QMainWindow):
     """
-         system tray icons.
-         Will initialize in the constructor.
+    Klasse des gesamten Hauptfensters mit allen Funktionen und Modi
     """
 
     tray_icon = None
 
-    # Override the class constructor
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+        QMainWindow.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
         # Load die UI Page
         uic.loadUi("ui/mainw.ui", self)
 
         # window icon
-        self.setWindowIcon(QIcon('ui/grafiken/icon.png'))
+        self.setWindowIcon(QIcon('../ui/grafiken/icon.png'))
         self.setWindowTitle('ICOS')
         # Init QSystemTrayIcon
         self.tray_icon = QSystemTrayIcon(self)
-        icon = QIcon('ui/grafiken/icon.png')
+        icon = QIcon('../ui/grafiken/icon.png')
         self.tray_icon.setIcon(icon)
 
         # Einstellung für Graphdingens
         self.tempw.setDownsampling(mode='peak')
         self.tempw.setClipToView(True)
         self.tempw.showGrid(x=True, y=True)
+        # self.tempw.setBackground('w')
 
-        self.luftfeuchtw.setDownsampling(mode='peak')
-        self.luftfeuchtw.setClipToView(True)
-        self.luftfeuchtw.showGrid(x=True, y=True)
+        self.luftdruckw.setDownsampling(mode='peak')
+        self.luftdruckw.setClipToView(True)
+        self.luftdruckw.showGrid(x=True, y=True)
+        # self.luftfeuchtw.setBackground('w')
 
         self.co2w.setDownsampling(mode='peak')
         self.co2w.setClipToView(True)
         self.co2w.showGrid(x=True, y=True)
+        # self.co2w.setBackground('w')
 
         self.lautw.setDownsampling(mode='peak')
         self.lautw.setClipToView(True)
         self.lautw.showGrid(x=True, y=True)
+        # self.lautw.setBackground('w')
 
         self.hellw.setDownsampling(mode='peak')
         self.hellw.setClipToView(True)
         self.hellw.showGrid(x=True, y=True)
+        # self.hellw.setBackground('w')
 
         self.anzeigegraph.setDownsampling(mode='peak')
         self.anzeigegraph.setClipToView(True)
         self.anzeigegraph.showGrid(x=True, y=True)
+        # self.anzeigegraph.setBackground('w')
 
         # darkmode button konfig
 
         self.darkmodebutton.clicked.connect(self.changecolor)
+
+        # dev clear button
+        self.cleardevbutton.clicked.connect(self.cleardevausgabe)
 
         #   Timer um alle Graphen zu updaten
 
@@ -852,7 +891,7 @@ class MainWindow(QMainWindow):
         self.timer.setInterval(1000)  # update aller 1000ms = 1s
         self.timer.timeout.connect(self.checkifdevcon)
         self.timer.timeout.connect(self.updatetempce)
-        self.timer.timeout.connect(self.updateluftfeucht)
+        self.timer.timeout.connect(self.updateluftdruck)
         self.timer.timeout.connect(self.updateco2)
         self.timer.timeout.connect(self.updatelaut)
         self.timer.timeout.connect(self.updatehell)
@@ -871,9 +910,9 @@ class MainWindow(QMainWindow):
         self.tempogelbgrenz_line = self.tempw.plot(pen=gelbgrenzpen)
         self.tempugelbgrenz_line = self.tempw.plot(pen=gelbgrenzpen)
 
-        self.luftfeucht_line = self.luftfeuchtw.plot(pen=pen)
-        self.luftfeuchtogrenz_line = self.luftfeuchtw.plot(pen=rotgrenzpen)
-        self.luftfeuchtugrenz_line = self.luftfeuchtw.plot(pen=gelbgrenzpen)
+        self.luftdruck_line = self.luftdruckw.plot(pen=pen)
+        self.luftdruckogrenz_line = self.luftdruckw.plot(pen=rotgrenzpen)
+        self.luftdruckugrenz_line = self.luftdruckw.plot(pen=gelbgrenzpen)
 
         self.co2_line = self.co2w.plot(pen=pen)
         self.co2orotgrenz_line = self.co2w.plot(pen=rotgrenzpen)
@@ -899,27 +938,27 @@ class MainWindow(QMainWindow):
 
         # fuer den graphen Dingens
 
-        self.temp_line.setPos(-60, 0)
-        self.temporotgrenz_line.setPos(-60, 0)
-        self.tempogelbgrenz_line.setPos(-60, 0)
-        self.tempurotgrenz_line.setPos(-60, 0)
-        self.tempugelbgrenz_line.setPos(-60, 0)
+        self.temp_line.setPos(-300, 0)
+        self.temporotgrenz_line.setPos(-300, 0)
+        self.tempogelbgrenz_line.setPos(-300, 0)
+        self.tempurotgrenz_line.setPos(-300, 0)
+        self.tempugelbgrenz_line.setPos(-300, 0)
 
-        self.luftfeucht_line.setPos(-60, 0)
-        self.luftfeuchtogrenz_line.setPos(-60, 0)
-        self.luftfeuchtugrenz_line.setPos(-60, 0)
+        self.luftdruck_line.setPos(-300, 0)
+        self.luftdruckogrenz_line.setPos(-300, 0)
+        self.luftdruckugrenz_line.setPos(-300, 0)
 
-        self.co2_line.setPos(-60, 0)
-        self.co2orotgrenz_line.setPos(-60, 0)
-        self.co2ogelbgrenz_line.setPos(-60, 0)
+        self.co2_line.setPos(-300, 0)
+        self.co2orotgrenz_line.setPos(-300, 0)
+        self.co2ogelbgrenz_line.setPos(-300, 0)
 
-        self.laut_line.setPos(-60, 0)
-        self.lautorotgrenz_line.setPos(-60, 0)
-        self.lautogelbgrenz_line.setPos(-60, 0)
+        self.laut_line.setPos(-300, 0)
+        self.lautorotgrenz_line.setPos(-300, 0)
+        self.lautogelbgrenz_line.setPos(-300, 0)
 
-        self.hell_line.setPos(-60, 0)
-        self.hellurotgrenz_line.setPos(-60, 0)
-        self.hellugelbgrenz_line.setPos(-60, 0)
+        self.hell_line.setPos(-300, 0)
+        self.hellurotgrenz_line.setPos(-300, 0)
+        self.hellugelbgrenz_line.setPos(-300, 0)
 
         self.temporotgrenz_line.setData(temporotgrenzlist)
         self.tempogelbgrenz_line.setData(tempogelbgrenzlist)
@@ -929,8 +968,8 @@ class MainWindow(QMainWindow):
         self.co2orotgrenz_line.setData(co2orotgrenzlist)
         self.co2ogelbgrenz_line.setData(co2ogelbgrenzlist)
 
-        self.luftfeuchtogrenz_line.setData(luftdruckogrenzlist)
-        self.luftfeuchtugrenz_line.setData(luftdruckugrenzlist)
+        self.luftdruckogrenz_line.setData(luftdruckogrenzlist)
+        self.luftdruckugrenz_line.setData(luftdruckugrenzlist)
 
         self.lautorotgrenz_line.setData(lautorotgrenzlist)
         self.lautogelbgrenz_line.setData(lautogelbgrenzlist)
@@ -965,8 +1004,6 @@ class MainWindow(QMainWindow):
         self.tray_icon.setContextMenu(tray_menu)
         self.tray_icon.show()
 
-        # sollte allgemein noch erweitert werden mit Doppelclick auf icon etc.
-
         # Menü
         self.actionSimpel.triggered.connect(self.changetosimpel)
         self.actionAdvanced.triggered.connect(self.changetoadvanced)
@@ -981,7 +1018,7 @@ class MainWindow(QMainWindow):
 
         self.actionFilmmodus.triggered.connect(self.filmmodus)
         self.actionGruppenarbeit.triggered.connect(self.gruppenarbeit)
-        self.actionNervigeKinder.triggered.connect(self.nervigekinder)
+        self.actionAudiowarnsignal.triggered.connect(self.audiowarnsignal)
 
         self.actionQuickfixes.triggered.connect(self.openhilfe)
         self.actionUnbekanterFehler.triggered.connect(self.openhilfe)
@@ -994,8 +1031,8 @@ class MainWindow(QMainWindow):
         self.adtemporotedit.setValidator(self.onlyInt)
         self.adtempugelbedit.setValidator(self.onlyInt)
         self.adtempurotedit.setValidator(self.onlyInt)
-        self.adluftfeuchtugelbedit.setValidator(self.onlyInt)
-        self.adluftfeuchtorotedit.setValidator(self.onlyInt)
+        self.adluftdruckugelbedit.setValidator(self.onlyInt)
+        self.adluftdruckorotedit.setValidator(self.onlyInt)
         self.adCO2ogelbedit.setValidator(self.onlyInt)
         self.adCO2orotedit.setValidator(self.onlyInt)
         self.adlautogelbedit.setValidator(self.onlyInt)
@@ -1007,8 +1044,8 @@ class MainWindow(QMainWindow):
         self.adtemporotedit.insert(str(temporotgrenz))
         self.adtempugelbedit.insert(str(tempugelbgrenz))
         self.adtempurotedit.insert(str(tempurotgrenz))
-        self.adluftfeuchtugelbedit.insert(str(luftdruckugrenz))
-        self.adluftfeuchtorotedit.insert(str(luftdruckogrenz))
+        self.adluftdruckugelbedit.insert(str(luftdruckugrenz))
+        self.adluftdruckorotedit.insert(str(luftdruckogrenz))
         self.adCO2ogelbedit.insert(str(co2ogelbgrenz))
         self.adCO2orotedit.insert(str(co2orotgrenz))
         self.adlautogelbedit.insert(str(lautogelbgrenz))
@@ -1020,7 +1057,7 @@ class MainWindow(QMainWindow):
         self.adchangegrenze.clicked.connect(self.changegrenzen)
 
         self.adtempbutton.clicked.connect(self.adtempbuttons)
-        self.adluftfeuchtbutton.clicked.connect(self.adluftfeuchtbuttons)
+        self.adluftdruckbutton.clicked.connect(self.adluftdruckbuttons)
         self.adCO2button.clicked.connect(self.adco2buttons)
         self.adlautbutton.clicked.connect(self.adlautbuttons)
         self.adhellbutton.clicked.connect(self.adhellbuttons)
@@ -1039,7 +1076,7 @@ class MainWindow(QMainWindow):
         self.labellayout.addWidget(self.co2_label)
 
         # setzen der Uhren (Liveuhr und Advanced-Modus Uhren)
-        digiuhrfnt = QFont('Arial', 12, QFont.Bold)
+        digiuhrfnt = QFont('Arial', 12)
         self.anauhr = Liveuhr()
         self.uhrlayout.addWidget(self.anauhr, 2)
 
@@ -1056,10 +1093,19 @@ class MainWindow(QMainWindow):
 
         self.digiuhr1.setAlignment(Qt.AlignCenter)
         self.digiuhr2.setAlignment(Qt.AlignCenter)
+        self.digiuhr1.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                                          QtWidgets.QSizePolicy.Fixed))
+        self.digiuhr2.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                                          QtWidgets.QSizePolicy.Fixed))
         self.digiuhr1.setFont(digiuhrfnt)
         self.digiuhr2.setFont(digiuhrfnt)
         self.anfangzeit.addWidget(self.digiuhr1)
         self.endzeit.addWidget(self.digiuhr2)
+
+        self.digiuhr1.setText('Anfang: \n' + 'JJJJ-MM-TT/HH-MM-SS')
+        self.digiuhr2.setText('Ende: \n' + 'JJJJ-MM-TT/HH-MM-SS')
+
+        self.addateiname.setText('JJJJ-MM-TT/HH-MM-SS.txt')
 
         # ampeln zuweisen
 
@@ -1087,6 +1133,9 @@ class MainWindow(QMainWindow):
 
         self.actionAbout.triggered.connect(aboutPopup.show)
 
+        # sound
+        self.player = QMediaPlayer()
+
         # Scaling zum Bildschirm beim Start
 
         if self.uimode.currentIndex() == 1:
@@ -1095,13 +1144,16 @@ class MainWindow(QMainWindow):
         elif self.uimode.currentIndex() == 0:
             self.move(bildbreite // 5, bildhoehe // 8)
             self.resize((int(bildbreite * 1.3)) // 2, (int(bildhoehe * 1.5)) // 2)
+        elif self.uimode.currentIndex() == 2:
+            self.move(bildbreite // 5, bildhoehe // 8)
+            self.resize((int(bildbreite * 1.3)) // 2, (int(bildhoehe * 1.5)) // 2)
 
     # modus ändern funktionen
 
     def changetosimpel(self, plhaltervar):
         self.uimode.setCurrentIndex(1)
         self.resize(bildbreite // 10, int(bildhoehe) - 30)
-        print(bildbreite // 10, int(bildhoehe) -30)
+        # print(bildbreite // 10, int(bildhoehe) - 30)
         self.move(0, 0)
         if self.darkmodebutton.isChecked():
             self.uimode.setStyleSheet('color: white;'
@@ -1111,7 +1163,7 @@ class MainWindow(QMainWindow):
 
     def changetoadvanced(self):
         self.uimode.setCurrentIndex(2)
-        self.resize((int(bildbreite * 1.5)) // 2, (int(bildhoehe * 1.5)) // 2)
+        self.resize((int(bildbreite * 1.3)) // 2, (int(bildhoehe * 1.5)) // 2)
         self.move(bildbreite // 5, bildhoehe // 8)
         if self.darkmodebutton.isChecked():
             self.uimode.setStyleSheet('color: white;'
@@ -1129,7 +1181,7 @@ class MainWindow(QMainWindow):
         else:
             self.uimode.setStyleSheet('')
 
-    # zu großample funktionen
+    # zugroßample funktionen
 
     def zugroampelhell(self, plhaltervar):
         self.groampellayout.removeWidget(self.groampel)
@@ -1164,7 +1216,7 @@ class MainWindow(QMainWindow):
         self.ampelnamelabel.setText('CO2')
         self.groampel.mousePressEvent = self.changetosimpel
 
-    # advancced modus
+    # advancced modus funktionen
 
     def opendatei(self):
         global dateiausgabe, startzeit, endzeit
@@ -1181,8 +1233,8 @@ class MainWindow(QMainWindow):
 
             sz = luftdaten[0].split(',')
             ez = luftdaten[-1].split(',')
-            self.digiuhr1.setText('Von: ' + str(sz[0]))
-            self.digiuhr2.setText('Bis: ' + str(ez[0]))
+            self.digiuhr1.setText('Anfang: \n' + str(sz[0]))
+            self.digiuhr2.setText('Ende: \n' + str(ez[0]))
             sz = sz[0].split('/')
             ez = ez[0].split('/')
             sz = sz[1].split(':')
@@ -1195,9 +1247,9 @@ class MainWindow(QMainWindow):
         self.datendateiverarb(1)
         self.adinfolabel.setText('Temperatur\n in °C')
 
-    def adluftfeuchtbuttons(self):
+    def adluftdruckbuttons(self):
         self.datendateiverarb(2)
-        self.adinfolabel.setText('Luftfeuchtigkeit\n in %')
+        self.adinfolabel.setText('Luftdruck\n in hPa')
 
     def adco2buttons(self):
         self.datendateiverarb(3)
@@ -1214,8 +1266,10 @@ class MainWindow(QMainWindow):
     def adcleardata(self):
         global dateiausgabe
         dateiausgabe = ''
-        self.addateiname.setText('')
         self.advanced_line.setData()
+        self.digiuhr1.setText('Anfang: \n' + 'JJJJ-MM-TT/HH-MM-SS')
+        self.digiuhr2.setText('Ende: \n' + 'JJJJ-MM-TT/HH-MM-SS')
+        self.addateiname.setText('JJJJ-MM-TT/HH-MM-SS.txt')
 
     def datendateiverarb(self, stelle=1):
         global dateiausgabe
@@ -1240,8 +1294,8 @@ class MainWindow(QMainWindow):
             adtempurotgrenzlist = np.full(listenlen, tempurotgrenz)
             adtempugelbgrenzlist = np.full(listenlen, tempugelbgrenz)
 
-            adluftfeuchtogrenzlist = np.full(listenlen, luftdruckogrenz)
-            adluftfeuchtugrenzlist = np.full(listenlen, luftdruckugrenz)
+            adluftdruckogrenzlist = np.full(listenlen, luftdruckogrenz)
+            adluftdruckugrenzlist = np.full(listenlen, luftdruckugrenz)
 
             adco2orotgrenzlist = np.full(listenlen, co2orotgrenz)
             adco2ogelbgrenzlist = np.full(listenlen, co2ogelbgrenz)
@@ -1258,10 +1312,10 @@ class MainWindow(QMainWindow):
                 self.adugelbgrenz.setData(adtempugelbgrenzlist)
                 self.adurotgrenz.setData(adtempurotgrenzlist)
             elif stelle == 2:
-                self.adorotgrenz.setData(adluftfeuchtogrenzlist)
+                self.adorotgrenz.setData(adluftdruckogrenzlist)
                 self.adogelbgrenz.setData('')
                 self.adugelbgrenz.setData('')
-                self.adurotgrenz.setData(adluftfeuchtugrenzlist)
+                self.adurotgrenz.setData(adluftdruckugrenzlist)
             elif stelle == 3:
                 self.adorotgrenz.setData(adco2orotgrenzlist)
                 self.adogelbgrenz.setData(adco2ogelbgrenzlist)
@@ -1277,7 +1331,8 @@ class MainWindow(QMainWindow):
                 self.adogelbgrenz.setData('')
                 self.adugelbgrenz.setData(adhellugelbgrenzlist)
                 self.adurotgrenz.setData(adhellurotgrenzlist)
-
+            # zum erweitern wäre noch
+            #   https://stackoverflow.com/questions/49046931/how-can-i-use-dateaxisitem-of-pyqtgraph
 
     def changegrenzen(self):
         global temporotgrenzlist, tempogelbgrenzlist, \
@@ -1290,39 +1345,39 @@ class MainWindow(QMainWindow):
 
         if int(self.adtemporotedit.text()) > int(self.adtempogelbedit.text()) and int(
                 self.adtempogelbedit.text()) > int(self.adtempugelbedit.text()):
-            temporotgrenzlist = np.full(60, int(self.adtemporotedit.text()))
-            tempogelbgrenzlist = np.full(60, int(self.adtempogelbedit.text()))
+            temporotgrenzlist = np.full(300, int(self.adtemporotedit.text()))
+            tempogelbgrenzlist = np.full(300, int(self.adtempogelbedit.text()))
             temporotgrenz = int(self.adtemporotedit.text())
             tempogelbgrenz = int(self.adtempogelbedit.text())
 
         if int(self.adtempurotedit.text()) < int(self.adtempugelbedit.text()) < int(
                 self.adtempogelbedit.text()):
-            tempurotgrenzlist = np.full(60, int(self.adtempurotedit.text()))
-            tempugelbgrenzlist = np.full(60, int(self.adtempugelbedit.text()))
+            tempurotgrenzlist = np.full(300, int(self.adtempurotedit.text()))
+            tempugelbgrenzlist = np.full(300, int(self.adtempugelbedit.text()))
             tempurotgrenz = int(self.adtempurotedit.text())
             tempugelbgrenz = int(self.adtempugelbedit.text())
 
-        if int(self.adluftfeuchtorotedit.text()) > int(self.adluftfeuchtugelbedit.text()):
-            luftfeuchtogrenzlist = np.full(60, int(self.adluftfeuchtorotedit.text()))
-            luftfeuchtugrenzlist = np.full(60, int(self.adluftfeuchtugelbedit.text()))
-            luftfeuchtogrenz = int(self.adluftfeuchtorotedit.text())
-            luftfeuchtugrenz = int(self.adluftfeuchtugelbedit.text())
+        if int(self.adluftdruckorotedit.text()) > int(self.adluftdruckugelbedit.text()):
+            luftdruckogrenzlist = np.full(300, int(self.adluftdruckorotedit.text()))
+            luftdruckugrenzlist = np.full(300, int(self.adluftdruckugelbedit.text()))
+            luftdruckogrenz = int(self.adluftdruckorotedit.text())
+            luftdruckugrenz = int(self.adluftdruckugelbedit.text())
 
         if int(self.adCO2orotedit.text()) > int(self.adCO2ogelbedit.text()):
-            co2orotgrenzlist = np.full(60, int(self.adCO2orotedit.text()))
-            co2ogelbgrenzlist = np.full(60, int(self.adCO2ogelbedit.text()))
+            co2orotgrenzlist = np.full(300, int(self.adCO2orotedit.text()))
+            co2ogelbgrenzlist = np.full(300, int(self.adCO2ogelbedit.text()))
             co2orotgrenz = int(self.adCO2orotedit.text())
             co2ogelbgrenz = int(self.adCO2ogelbedit.text())
 
         if int(self.adlautorotedit.text()) > int(self.adlautogelbedit.text()):
-            lautorotgrenzlist = np.full(60, int(self.adlautorotedit.text()))
-            lautogelbgrenzlist = np.full(60, int(self.adlautogelbedit.text()))
+            lautorotgrenzlist = np.full(300, int(self.adlautorotedit.text()))
+            lautogelbgrenzlist = np.full(300, int(self.adlautogelbedit.text()))
             lautorotgrenz = int(self.adlautorotedit.text())
             lautogelbgrenz = int(self.adlautogelbedit.text())
 
         if int(self.adhellurotedit.text()) < int(self.adhellugelbedit.text()):
-            hellurotgrenzlist = np.full(60, int(self.adhellurotedit.text()))
-            hellugelbgrenzlist = np.full(60, int(self.adhellugelbedit.text()))
+            hellurotgrenzlist = np.full(300, int(self.adhellurotedit.text()))
+            hellugelbgrenzlist = np.full(300, int(self.adhellugelbedit.text()))
             hellurotgrenz = int(self.adhellurotedit.text())
             hellugelbgrenz = int(self.adhellugelbedit.text())
 
@@ -1330,8 +1385,8 @@ class MainWindow(QMainWindow):
         self.adtemporotedit.clear()
         self.adtempugelbedit.clear()
         self.adtempurotedit.clear()
-        self.adluftfeuchtugelbedit.clear()
-        self.adluftfeuchtorotedit.clear()
+        self.adluftdruckugelbedit.clear()
+        self.adluftdruckorotedit.clear()
         self.adCO2ogelbedit.clear()
         self.adCO2orotedit.clear()
         self.adlautogelbedit.clear()
@@ -1343,8 +1398,8 @@ class MainWindow(QMainWindow):
         self.adtemporotedit.insert(str(temporotgrenz))
         self.adtempugelbedit.insert(str(tempugelbgrenz))
         self.adtempurotedit.insert(str(tempurotgrenz))
-        self.adluftfeuchtugelbedit.insert(str(luftfeuchtugrenz))
-        self.adluftfeuchtorotedit.insert(str(luftfeuchtogrenz))
+        self.adluftdruckugelbedit.insert(str(luftdruckugrenz))
+        self.adluftdruckorotedit.insert(str(luftdruckogrenz))
         self.adCO2ogelbedit.insert(str(co2ogelbgrenz))
         self.adCO2orotedit.insert(str(co2orotgrenz))
         self.adlautogelbedit.insert(str(lautogelbgrenz))
@@ -1360,8 +1415,8 @@ class MainWindow(QMainWindow):
         self.co2orotgrenz_line.setData(co2orotgrenzlist)
         self.co2ogelbgrenz_line.setData(co2ogelbgrenzlist)
 
-        self.luftfeuchtogrenz_line.setData(luftfeuchtogrenzlist)
-        self.luftfeuchtugrenz_line.setData(luftfeuchtugrenzlist)
+        self.luftdruckogrenz_line.setData(luftdruckogrenzlist)
+        self.luftdruckugrenz_line.setData(luftdruckugrenzlist)
 
         self.lautorotgrenz_line.setData(lautorotgrenzlist)
         self.lautogelbgrenz_line.setData(lautogelbgrenzlist)
@@ -1369,15 +1424,15 @@ class MainWindow(QMainWindow):
         self.hellurotgrenz_line.setData(hellurotgrenzlist)
         self.hellugelbgrenz_line.setData(hellugelbgrenzlist)
 
-        grenzdaten = open('ui/einstellungen/grenzen.txt', 'r')
+        grenzdaten = open('../ui/einstellungen/grenzen.txt', 'r')
         grenzen = grenzdaten.readlines()
         grenzen[3] = str(temporotgrenz) + '\n'
         grenzen[1] = str(tempogelbgrenz) + '\n'
         grenzen[7] = str(tempurotgrenz) + '\n'
         grenzen[5] = str(tempugelbgrenz) + '\n'
 
-        grenzen[11] = str(luftfeuchtogrenz) + '\n'
-        grenzen[9] = str(luftfeuchtugrenz) + '\n'
+        grenzen[11] = str(luftdruckogrenz) + '\n'
+        grenzen[9] = str(luftdruckugrenz) + '\n'
 
         grenzen[15] = str(co2orotgrenz) + '\n'
         grenzen[13] = str(co2ogelbgrenz) + '\n'
@@ -1388,12 +1443,11 @@ class MainWindow(QMainWindow):
         grenzen[23] = str(hellurotgrenz) + '\n'
         grenzen[21] = str(hellugelbgrenz) + '\n'
 
-        grenzdaten = open('ui/einstellungen/grenzen.txt', 'w')
+        grenzdaten = open('../ui/einstellungen/grenzen.txt', 'w')
         grenzdaten.writelines(grenzen)
         grenzdaten.close()
 
-    # modi und warnungen
-    # funktioniert noch nicht wie es soll aber irgendwie doch
+    # Unterricht und Warnungen
 
     def filmmodus(self):
         global lautwarnungen, hellwarnungen
@@ -1428,22 +1482,25 @@ class MainWindow(QMainWindow):
             lautwarnungen = True
             self.actionFilmmodus.setEnabled(1)
 
-    def nervigekinder(self):  # störsound wenn kinder nerven(zu laut sind)
-        pass
+    def audiowarnsignal(self):
+        global warntonbeiswitch
+        full_file_path = os.path.join(os.getcwd(), '../ui/sounds/sound.mp3')
+        url = QUrl.fromLocalFile(full_file_path)
+        content = QMediaContent(url)
+        self.player.setMedia(content)
 
     def tempwarnanaus(self):
         global tempwarnungen
         warnungPopup.hide()
-        if tempwarnungen:
+        if not self.actiontempwarnungen.isChecked():
             tempwarnungen = False
-
         else:
             tempwarnungen = True
 
     def lautwarnanaus(self):
         global lautwarnungen
         warnungPopup.hide()
-        if lautwarnungen:
+        if not self.actionlautwarnungen.isChecked():
             lautwarnungen = False
 
         else:
@@ -1452,24 +1509,22 @@ class MainWindow(QMainWindow):
     def co2warnanaus(self):
         global co2warnungen
         warnungPopup.hide()
-        if co2warnungen:
+        if not self.actionco2warnungen.isChecked():
             co2warnungen = False
-
         else:
             co2warnungen = True
 
     def hellwarnanaus(self):
         global hellwarnungen
         warnungPopup.hide()
-        if hellwarnungen:
+        if not self.actionhellwarnungen.isChecked():
             hellwarnungen = False
-
         else:
             hellwarnungen = True
 
     def allewarnaus(self):
         global tempwarnungen, lautwarnungen, co2warnungen, hellwarnungen
-
+        warnungPopup.hide()
         tempwarnungen = False
         lautwarnungen = False
         co2warnungen = False
@@ -1480,12 +1535,13 @@ class MainWindow(QMainWindow):
         self.actionhellwarnungen.setChecked(0)
 
     def openhilfe(self):
-        os.startfile('info+hilfe\\Standardprobleme.pdf')
+        os.startfile('../info+hilfe/Standardprobleme.pdf')
 
-    # live funktionen für den dev modus (zeit und werte)
+    # live Funktionen für den dev-modus (zeit und werte)
 
     def updatetempce(self):
-        global tempcelist, daten, temporotgrenz, tempogelbgrenz, tempurotgrenz, tempugelbgrenz, tempampelfarbe
+        global tempcelist, daten, temporotgrenz, tempogelbgrenz,\
+            tempurotgrenz, tempugelbgrenz, tempampelfarbe, tempwarnungen
 
         # gibt den derzeitgigen Wert in das LCDWidget
         self.tempanzei.display(daten[1])
@@ -1493,24 +1549,34 @@ class MainWindow(QMainWindow):
         if daten[1] < tempurotgrenz:
             self.temp_line.setPen(QColor(255, 0, 0))
             tempampelfarbe = 'rot'
+            self.tempampel.setStyleSheet('background-color: rgb(0, 255, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             warnungPopup.warnungenTempniedrig()
         elif tempurotgrenz <= daten[1] <= tempugelbgrenz:
-
             self.temp_line.setPen(QColor(255, 255, 0))
+            self.tempampel.setStyleSheet('background-color: rgb(255, 255, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             tempampelfarbe = 'gelb'
-            #   warnungPopup.warnungenTempniedrig()
-        elif tempugelbgrenz < daten[1] <= tempogelbgrenz:
+            if self.actiontempwarnungen.isChecked():
+               tempwarnungen = True
 
+        elif tempugelbgrenz < daten[1] <= tempogelbgrenz:
             self.temp_line.setPen(QColor(0, 255, 0))
+            self.tempampel.setStyleSheet('background-color: rgb(0, 255, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             tempampelfarbe = 'gruen'
         elif tempogelbgrenz < daten[1] <= temporotgrenz:
-
             self.temp_line.setPen(QColor(255, 255, 0))
+            self.tempampel.setStyleSheet('background-color: rgb(255, 255, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             tempampelfarbe = 'gelb'
-            #   warnungPopup.warnungTemphoch()
-        elif daten[1] > temporotgrenz:
+            if self.actiontempwarnungen.isChecked():
+               tempwarnungen = True
 
+        elif daten[1] > temporotgrenz:
             self.temp_line.setPen(QColor(255, 0, 0))
+            self.tempampel.setStyleSheet('background-color: rgb(255, 0, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             tempampelfarbe = 'rot'
             warnungPopup.warnungTemphoch()
 
@@ -1520,45 +1586,61 @@ class MainWindow(QMainWindow):
         tempcelist[-1] = daten[1]
 
         self.temp_line.setData(tempcelist)  # graph wird mit der aktualisiereten Datenliste erzeugt
+        if self.opanzeig.isChecked():
+            self.devausgabe.append('\n' + 'tempupdate')
 
-    def updateluftfeucht(self):
+    def updateluftdruck(self):
         global luftdrucklist, daten, luftdruckogrenz, luftdruckugrenz
 
         #   gibt den derzeitgigen Wert in das LCDWidget
-        self.luftfeuchtanzei.display(daten[2])
+        self.luftdruckanzei.display(daten[2])
         #   ampel umstellung für den entsprechenden wert
-        if daten[2] >= 70:
-
-            self.luftfeucht_line.setPen(QColor(255, 0, 0))
-        elif daten[2] <= 35:
-
-            self.luftfeucht_line.setPen(QColor(255, 255, 0))
+        if daten[2] >= luftdruckogrenz:
+            self.luftdruck_line.setPen(QColor(255, 0, 0))
+            self.luftdruckampel.setStyleSheet('background-color: rgb(255, 0, 0);'
+                                              'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
+        elif daten[2] <= luftdruckugrenz:
+            self.luftdruck_line.setPen(QColor(255, 255, 0))
+            self.luftdruckampel.setStyleSheet('background-color: rgb(255, 255, 0);'
+                                              'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
         else:
-
-            self.luftfeucht_line.setPen(QColor(0, 255, 0))
+            self.luftdruck_line.setPen(QColor(0, 255, 0))
+            self.luftdruckampel.setStyleSheet('background-color: rgb(0, 255, 0);'
+                                              'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
         #   muss angepasst werden an die Werte
 
-        luftfeuchtlist[:-1] = luftfeuchtlist[1:]
-        luftfeuchtlist[-1] = daten[2]
+        luftdrucklist[:-1] = luftdrucklist[1:]
+        luftdrucklist[-1] = daten[2]
 
-        self.luftfeucht_line.setData(luftfeuchtlist)  # graph wird mit der aktualisiereten Datenliste erzeugt
+        self.luftdruck_line.setData(luftdrucklist)  # graph wird mit der aktualisiereten Datenliste erzeugt
+        if self.opanzeig.isChecked():
+            self.devausgabe.append('luftdruckupdate')
 
     def updateco2(self):
-        global co2list, daten, co2orotgrenz, co2ogelbgrenz, co2ampelfarbe
+        global co2list, daten, co2orotgrenz, co2ogelbgrenz, co2ampelfarbe, co2warnungen
 
         #   gibt den derzeitgigen Wert in das LCDWidget
         self.co2anzei.display(daten[3])
         #   ampel umstellung für den entsprechenden wert
         if daten[3] > co2orotgrenz:
             self.co2_line.setPen(QColor(255, 0, 0))
+            self.co2ampel.setStyleSheet('background-color: rgb(255, 0, 0);'
+                                        'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             co2ampelfarbe = 'rot'
             warnungPopup.warnungCo2()
+            if self.actionAudiowarnsignal.isChecked():
+                self.player.play()
         elif co2ogelbgrenz <= daten[3] <= co2orotgrenz:
             co2ampelfarbe = 'gelb'
             self.co2_line.setPen(QColor(255, 255, 0))
-            # warnungPopup.warnungCo2()
+            self.co2ampel.setStyleSheet('background-color: rgb(255, 255, 0);'
+                                        'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
+            if self.actionco2warnungen.isChecked():
+                co2warnungen = True
         else:  # also <1000
             self.co2_line.setPen(QColor(0, 255, 0))
+            self.co2ampel.setStyleSheet('background-color: rgb(0, 255, 0);'
+                                        'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             co2ampelfarbe = 'gruen'
         # muss angepasst werden an die Werte
 
@@ -1566,54 +1648,80 @@ class MainWindow(QMainWindow):
         co2list[-1] = daten[3]
 
         self.co2_line.setData(co2list)  # graph wird mit der aktualisiereten Datenliste erzeugt
+        if self.opanzeig.isChecked():
+            self.devausgabe.append('co2update')
 
     def updatelaut(self):
-        global lautlist, daten, lautorotgrenz, lautogelbgrenz, lautampelfarbe
+        global lautlist, daten, lautorotgrenz, lautogelbgrenz, lautampelfarbe, lautwarnungen
 
         # gibt den derzeitgigen Wert in das LCDWidget
         self.lautanzei.display(daten[4])
         # ampel umstellung für den entsprechenden wert
         if daten[4] > lautorotgrenz:
             self.laut_line.setPen(QColor(255, 0, 0))
+            self.lautampel.setStyleSheet('background-color: rgb(255, 0, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             lautampelfarbe = 'rot'
             warnungPopup.warnungLautstaerke()
+            if self.actionAudiowarnsignal.isChecked():
+                self.player.play()
         elif lautogelbgrenz <= daten[4] <= lautorotgrenz:
             self.laut_line.setPen(QColor(255, 255, 0))
+            self.lautampel.setStyleSheet('background-color: rgb(255, 255, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             lautampelfarbe = 'gelb'
-            # warnungPopup.warnungLautstaerke()
+            if self.actionlautwarnungen.isChecked():
+                lautwarnungen = True
         else:  # also kleiner als 65
             self.laut_line.setPen(QColor(0, 255, 0))
+            self.lautampel.setStyleSheet('background-color: rgb(0, 255, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             lautampelfarbe = 'gruen'
+            if self.actionlautwarnungen.isChecked():
+                lautwarnungen = True
         # muss angepasst werden an die Werte
 
         lautlist[:-1] = lautlist[1:]
         lautlist[-1] = daten[4]
 
         self.laut_line.setData(lautlist)  # graph wird mit der aktualisiereten Datenliste erzeugt
+        if self.opanzeig.isChecked():
+            self.devausgabe.append('lautupdate')
 
     def updatehell(self):
-        global helllist, daten, hellurotgrenz, hellugelbgrenz, hellampelfarbe
+        global helllist, daten, hellurotgrenz, hellugelbgrenz, hellampelfarbe, hellwarnungen
 
         # gibt den derzeitgigen Wert in das LCDWidget
         self.hellanzei.display(daten[5])
         # ampel umstellung für den entsprechenden wert
         if daten[5] < hellurotgrenz:
             self.hell_line.setPen(QColor(255, 0, 0))
+            self.hellampel.setStyleSheet('background-color: rgb(255, 0, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             hellampelfarbe = 'rot'
             warnungPopup.warnungLicht()
         elif hellurotgrenz <= daten[5] <= hellugelbgrenz:
             self.hell_line.setPen(QColor(255, 255, 0))
+            self.hellampel.setStyleSheet('background-color: rgb(255, 255, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             hellampelfarbe = 'gelb'
-            #   warnungPopup.warnungLicht()
+            if self.actionhellwarnungen.isChecked():
+                hellwarnungen = True
         else:  # groeßer als 300
             self.hell_line.setPen(QColor(0, 255, 0))
+            self.hellampel.setStyleSheet('background-color: rgb(0, 255, 0);'
+                                         'font: 14pt "MS Shell Dlg 2";color: rgb(0, 0, 0);')
             hellampelfarbe = 'gruen'
+            if self.actionhellwarnungen.isChecked():
+                hellwarnungen = True
         # muss angepasst werden an die Werte
 
         helllist[:-1] = helllist[1:]
         helllist[-1] = daten[5]
 
         self.hell_line.setData(helllist)  # graph wird mit der aktualisiereten Datenliste erzeugt
+        if self.opanzeig.isChecked():
+            self.devausgabe.append('hellupdate')
 
     def zeitausgabe(self):
         currenttime = QTime.currentTime()
@@ -1628,14 +1736,29 @@ class MainWindow(QMainWindow):
         self.show()
 
     def checkifdevcon(self):
+        global deviceconnected
 
         if deviceconnected:
 
-            self.istdevcon.setStyleSheet('background-color : green')
-            self.istdevcon.setText('Device connected')
+            self.istdevcon.setStyleSheet('background-color : darkgreen')
+            self.istdevcon.setText('Verbunden')
+            self.istsimpelcon.setStyleSheet('background-color : darkgreen')
+            self.istsimpelcon.setText('Verbunden')
+            self.comanzeig.setText(str(devicecom))
+            self.anzahlcom.setText(str(len(COM)))
+            if self.infoanzeig.isChecked():
+                self.devausgabe.append('\n' + str(daten))
+
         else:
             self.istdevcon.setStyleSheet('background-color : red')
-            self.istdevcon.setText('Device not connected')
+            self.istdevcon.setText('Nicht Verbunden')
+            self.istsimpelcon.setStyleSheet('background-color : red')
+            self.istsimpelcon.setText('Nicht Verbunden')
+            self.comanzeig.setText('')
+            self.anzahlcom.setText(str(len(COM)))
+
+    def cleardevausgabe(self):
+        self.devausgabe.clear()
 
     def changecolor(self):
 
@@ -1666,6 +1789,7 @@ class MainWindow(QMainWindow):
 
 
 def grafikdingens():
+    '''Setup für das Hauptfenster '''
     app = QApplication(sys.argv)
     mw = MainWindow()
     mw.show()
@@ -1673,8 +1797,8 @@ def grafikdingens():
 
 
 def datenzeugs():
+    '''Datenthread welcher sich um Verbindung, Datenabruf und Datenverarbeitung kümmert '''
     global daten
-    print(daten)
 
     def dateianlegen():
         """ nimmt die aktualle Zeit und erstellt eine .txt Datei mit der Startzeit als Namen"""
@@ -1698,26 +1822,36 @@ def datenzeugs():
 
         dateinamein = str('savedluftdata/' + zeit + '.txt')
         speicher = open(dateinamein, "a")
-        speicher.write('time,tempce,luftfeucht,co2,laut,hell')  # auf göße anpassen
+        speicher.write('time,tempce,luftdruck,co2,laut,hell')  # auf göße anpassen
         speicher.close()
         return dateinamein
 
     def connect():
-        """ stellt die Verbindung zu serial port auf"""
-        global deviceconnected, ser
+        """ stellt die Verbindung zu serial port auf """
+        global deviceconnected, ser, devicecom, treiber
         if not deviceconnected:
             COM = [comport.device for comport in serial.tools.list_ports.comports()]
+            print(COM)
             for e in COM:
                 try:
-                    ser = serial.Serial(str(e), baudrate=115200, timeout=1)
+                    ser = serial.Serial(str(e), baudrate=115200, timeout=2)
                     data = ser.readline().decode('ascii')
                     datalist = data.split(' ')
+                    print(datalist)
                     comtestwert = float(datalist[0])
                     deviceconnected = True
+                    devicecom = e
                     break
                 except:
                     ser = None
                     deviceconnected = False
+                    print(len(COM))
+                    if COM == [''] and treiber == False:
+                        os.startfile('../CP2102-windows-installer/pololu-cp2102-setup-x64.exe')
+                        treiber = True
+                    else:
+                        treiber = True
+
         else:
             pass
 
@@ -1736,31 +1870,30 @@ def datenzeugs():
                 datalist = data.split(' ')
                 time = datetime.datetime.now().strftime("%Y-%m-%d/%H:%M:%S")
                 tempce = float(datalist[0])
-                luftfeucht = float(datalist[1])
+                luftdruck = float(datalist[1])
                 co2 = float(datalist[2])
                 laut = float(datalist[3])
                 hell = float(datalist[4])
-                datentu = time, tempce, luftfeucht, co2, laut, hell
+                datentu = time, tempce, luftdruck, co2, laut, hell
 
             except:
                 time = datetime.datetime.now().strftime("%Y-%m-%d/%H:%M:%S")
-                datentu = (time, 25, 51.0, 669.0, 50.0, 400)
+                datentu = (time, 22, 1000, 0, 0, 400)
                 deviceconnected = False
 
             return datentu
             # gibt keinen error aus
 
-
         def speichern(dateiname, daten):
             """öffnet die datei schreibt die Daten in die .txt
             und schließt diese wieder"""
-            datenstr = str(daten[0]) + ',' + str(daten[1]) + ',' +\
-                       str(daten[2]) + ',' + str(daten[3]) + ',' +\
+            datenstr = str(daten[0]) + ',' + str(daten[1]) + ',' + \
+                       str(daten[2]) + ',' + str(daten[3]) + ',' + \
                        str(daten[4]) + ',' + str(daten[5])
             speicher = open(dateiname, "a")
             speicher.write('\n')
             speicher.write(str(datenstr))
-            speicher.close()  # stess testen
+            speicher.close()
 
         while True:
             connect()
@@ -1768,6 +1901,7 @@ def datenzeugs():
             daten = datenabruf()
 
             speichern(dateiname, daten)
+
             time.sleep(1)
 
     dateiname = dateianlegen()
