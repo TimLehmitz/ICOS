@@ -6,7 +6,7 @@ import time
 
 import numpy as np
 import pyqtgraph as pg
-import serial  # nessessary?
+import serial  # necessary?
 import serial.tools.list_ports
 # anschauen --> https://github.com/pyserial/pyserial-asyncio
 
@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, qApp
 
 # Bildschirmgrößen Bestimmung
-# test for gitthub
+
 
 
 auflwidget = QtWidgets.QApplication(sys.argv)
